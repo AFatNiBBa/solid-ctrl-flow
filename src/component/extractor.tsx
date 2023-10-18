@@ -72,6 +72,7 @@ function Source(this: Context<Store | undefined>, props: { children: JSX.Element
 
 /** Allows {@link Dest} and {@link Source} childrens to communicate with each other  */
 function Joint(this: Context<Store | undefined>, props: { children: JSX.Element }) {
+    const { Provider } = this;
     const obj = createMutable<Store>({ attached: false });
-    return <this.Provider value={obj} children={props.children} />
+    return <Provider value={obj} children={props.children} />
 }
