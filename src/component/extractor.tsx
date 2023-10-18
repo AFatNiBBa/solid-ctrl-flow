@@ -1,5 +1,5 @@
 
-import { Context, JSX, Show, children, createContext, onCleanup, useContext } from "solid-js";
+import { Context, JSX, Show, createContext, createMemo, onCleanup, useContext } from "solid-js";
 import { createMutable } from "solid-js/store";
 
 /** Type of the data stored in each context created by {@link createExtractor} */
@@ -53,7 +53,7 @@ export function createExtractor(name = "extractor") {
 function Dest(this: Context<Store | undefined>) {
     const obj = useContext(this);
     if (!obj) return;
-    if (obj.attached) throw new Error("Un extractor non può avere più di una destinazione");
+    if (obj.attached) throw new Error("An extractor can't have more than one destination");
     obj.attached = true;
     onCleanup(() => obj.attached = false);
     return <>{obj.source}</>;
@@ -63,8 +63,8 @@ function Dest(this: Context<Store | undefined>) {
 function Source(this: Context<Store | undefined>, props: { children: JSX.Element }) {
     const obj = useContext(this);
     if (!obj) return props.children;
-    if (obj.source) throw new Error("Un extractor non può avere più di una sorgente");
-    const memo = children(() => props.children);
+    if (obj.source) throw new Error("An extractor can't have more than one source");
+    const memo = createMemo(() => props.children);
     obj.source = <>{memo()}</>;
     onCleanup(() => obj.source = undefined);
     return <Show when={!obj.attached} children={memo()} />
