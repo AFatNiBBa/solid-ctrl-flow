@@ -1,9 +1,9 @@
 
-import { Context, JSX, Show, createContext, createMemo, onCleanup, useContext } from "solid-js";
+import { Accessor, Context, JSX, Show, createContext, createMemo, onCleanup, useContext } from "solid-js";
 import { createMutable } from "solid-js/store";
 
 /** Type of the data stored in each context created by {@link createExtractor} */
-type Store = { attached: number, source?: JSX.Element };
+type Store = { attached: number, source?: Accessor<JSX.Element> };
 
 /**
  * Creates a slot that allows you to show a component outside of its parent.
@@ -63,10 +63,9 @@ function Source(this: Context<Store | undefined>, props: { children: JSX.Element
     const obj = useContext(this);
     if (!obj) return props.children;
     if (obj.source) throw new Error("An extractor can't have more than one source");
-    const memo = createMemo(() => props.children);
-    obj.source = <>{memo()}</>;
+    obj.source = () => props.children;
     onCleanup(() => obj.source = undefined);
-    return <Show when={!obj.attached} children={memo()} />
+    return <Show when={!obj.attached} children={obj.source()} />
 }
 
 /** Allows {@link Dest} and {@link Source} childrens to communicate with each other  */
