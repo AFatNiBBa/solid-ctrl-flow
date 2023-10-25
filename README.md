@@ -63,7 +63,7 @@ function MyCustomComponent() {
   </>
 }
 ```
-If you use it normally it will output `1`, `2`, `3`, `4`, `5`
+If you use it normally it will output `4`, `1`, `2`, `3`, `5`
 ```tsx
 return <>
   4

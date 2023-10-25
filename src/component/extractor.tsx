@@ -3,7 +3,7 @@ import { Context, JSX, Show, createContext, createMemo, onCleanup, useContext } 
 import { createMutable } from "solid-js/store";
 
 /** Type of the data stored in each context created by {@link createExtractor} */
-type Store = { attached: boolean, source?: JSX.Element };
+type Store = { attached: number, source?: JSX.Element };
 
 /**
  * Creates a slot that allows you to show a component outside of its parent.
@@ -40,7 +40,7 @@ export function createExtractor(name = "extractor") {
 
         /**
          * Gets an {@link Accessor} that tells if the context in which THIS getter has been executed has been extracted (Is inside of a {@link Dest})
-         * @returns Returns `null` if there is no parent {@link Joint}, `false` if there is a {@link Joint} but not a {@link Dest} and `true` otherwise
+         * @returns Returns `null` if there is no parent {@link Joint}, the number of {@link Dest}s in which this component is being displayed otherwise (Usually 1)
          */
         get isExtracted() {
             const obj = useContext(ctx);
@@ -53,9 +53,8 @@ export function createExtractor(name = "extractor") {
 function Dest(this: Context<Store | undefined>) {
     const obj = useContext(this);
     if (!obj) return;
-    if (obj.attached) throw new Error("An extractor can't have more than one destination");
-    obj.attached = true;
-    onCleanup(() => obj.attached = false);
+    obj.attached++;
+    onCleanup(() => obj.attached--);
     return <>{obj.source}</>;
 }
 
@@ -73,6 +72,6 @@ function Source(this: Context<Store | undefined>, props: { children: JSX.Element
 /** Allows {@link Dest} and {@link Source} childrens to communicate with each other  */
 function Joint(this: Context<Store | undefined>, props: { children: JSX.Element }) {
     const { Provider } = this;
-    const obj = createMutable<Store>({ attached: false });
+    const obj = createMutable<Store>({ attached: 0 });
     return <Provider value={obj} children={props.children} />
 }
