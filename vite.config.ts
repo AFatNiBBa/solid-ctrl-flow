@@ -11,8 +11,8 @@ export default defineConfig({
         target: "ESNext",
         lib: {
             entry: join(__dirname, "src/index.tsx"),
-            fileName: "flow",
-            name: "solidFlow"
+            fileName: "index",
+            name: "solidCtrlFlow"
         },
         rollupOptions: {
             output: { globals: x => x.replace(/\W(\w)/g, (_, x) => x.toUpperCase()) },
