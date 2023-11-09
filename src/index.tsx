@@ -14,7 +14,7 @@ export * from "./component/extractor";
 export function memoProps<T, K extends readonly (keyof T)[] = (keyof T)[]>(obj: T, keys: K = Object.keys(obj!) as unknown as K) {
     const out = {};
     for (const elm of keys)
-        Object.defineProperty(out, elm, { get: createMemo(() => obj[elm]) });
+        Object.defineProperty(out, elm, { enumerable: true, get: createMemo(() => obj[elm]) });
     return out as Pick<T, K[number]>;
 }
 
