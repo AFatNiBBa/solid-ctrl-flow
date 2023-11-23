@@ -1,9 +1,16 @@
 
-import { Accessor, Context, JSX, Show, createContext, createMemo, onCleanup, useContext } from "solid-js";
+import { Context, For, JSX, Show, createContext, createMemo, onCleanup, useContext } from "solid-js";
 import { createMutable } from "solid-js/store";
 
 /** Type of the data stored in each context created by {@link createExtractor} */
-type Store = { attached: number, source?: Accessor<JSX.Element> };
+type Store = { attached: number, source: Info[] };
+
+/** Informations about a {@link Source} component */
+type Info = {
+    /** Order of the current source if there are many */
+    order?: number,
+    children: JSX.Element
+};
 
 /**
  * Creates a slot that allows you to show a component outside of its parent.
@@ -55,22 +62,27 @@ function Dest(this: Context<Store | undefined>) {
     if (!obj) return;
     obj.attached++;
     onCleanup(() => obj.attached--);
-    return <>{obj.source}</>;
+    return <>
+        <For each={obj.source.sort((a, b) => a.order! - b.order!)}>
+            {x => <>{x.children}</>}
+        </For>
+    </>
 }
 
 /** Puts its content inside of a {@link Dest} if it is available */
-function Source(this: Context<Store | undefined>, props: { children: JSX.Element }) {
+function Source(this: Context<Store | undefined>, props: Info) {
     const obj = useContext(this);
     if (!obj) return props.children;
-    if (obj.source) throw new Error("An extractor can't have more than one source");
-    obj.source = () => props.children;
-    onCleanup(() => obj.source = undefined);
-    return <Show when={!obj.attached} children={obj.source()} />
+    const order = createMemo(() => props.order || 0);
+    const info: Info = { get order() { return order(); }, get children() { return props.children; } }; // Memoizes only "order"
+    obj.source.push(info);
+    onCleanup(() => obj.source.splice(obj.source.indexOf(info), 1));
+    return <Show when={!obj.attached} children={info.children} />
 }
 
 /** Allows {@link Dest} and {@link Source} childrens to communicate with each other  */
 function Joint(this: Context<Store | undefined>, props: { children: JSX.Element }) {
     const { Provider } = this;
-    const obj = createMutable<Store>({ attached: 0 });
+    const obj = createMutable<Store>({ attached: 0, source: [] });
     return <Provider value={obj} children={props.children} />
 }

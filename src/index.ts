@@ -1,5 +1,5 @@
 
-import { createMemo, splitProps } from "solid-js";
+import { Context, createMemo, createRoot, getOwner, splitProps, untrack } from "solid-js";
 
 export * from "./component/case";
 export * from "./component/debug";
@@ -26,4 +26,25 @@ export function memoProps<T, K extends readonly (keyof T)[] = (keyof T)[]>(obj: 
 export function splitAndMemoProps<T extends object, K extends readonly (keyof T)[]>(obj: T, keys: K) {
     const [ mine, other ] = splitProps(obj, keys);
     return [ memoProps(mine, keys), other ] as const;
+}
+
+/**
+ * Executes {@link f} with the provided {@link Context}
+ * @param ctx The context to which to set the value
+ * @param value The value for the context
+ * @param f The function to run
+ * @returns The same thing {@link f} returned
+ */
+export function runWithContext<T, R>(ctx: Context<T>, value: T, f: (x: T) => R) {
+	return createRoot(async d => {
+		try
+        {
+            getOwner()!.context = { [ctx.id]: value };
+            const out = f(value);
+            if (out instanceof Promise)
+                return <R>out.finally(d);
+            return d(), out;
+        }
+		catch (ex) { throw d(), ex; }
+	});
 }

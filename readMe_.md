@@ -121,3 +121,6 @@ Creates a partial version of an object with memoized remaining properties
 
 ### `splitAndMemoProps()`
 Like `splitProps()` but memoizes the whole local part
+
+### `runWithContext()`
+Creates a context scope that persists for the duration of a function
