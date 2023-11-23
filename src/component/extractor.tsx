@@ -74,7 +74,7 @@ function Source(this: Context<Store | undefined>, props: Info) {
     const obj = useContext(this);
     if (!obj) return props.children;
     const order = createMemo(() => props.order || 0);
-    const info: Info = { get order() { return order(); }, get children() { return props.children; } }; // Memoizes only "order"
+    const info = { get order() { return order(); }, get children() { return props.children; } } satisfies Info; // Memoizes only "order"
     obj.source.push(info);
     onCleanup(() => obj.source.splice(obj.source.indexOf(info), 1));
     return <Show when={!obj.attached} children={info.children} />
