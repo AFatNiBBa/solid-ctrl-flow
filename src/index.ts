@@ -48,3 +48,15 @@ export function runWithContext<T, R>(ctx: Context<T>, value: T, f: (x: T) => R) 
 		catch (ex) { throw d(), ex; }
 	});
 }
+
+/**
+ * Executes {@link f} untracking it.
+ * Due to the fact that the function is passed as input, it does not untrack its changes (It's intentional)
+ * @param this The same thing that {@link f} wants as `this`
+ * @param f The function to call
+ * @param args Arguments for calling {@link f}
+ * @returns The same thing {@link f} returned
+ */
+export function untrackCall<F extends (...args: any[]) => any>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
+    return untrack(() => f.apply(this, args));
+}
