@@ -63,7 +63,7 @@ function MyCustomComponent() {
   </>
 }
 ```
-If you use it normally it will output `4`, `1`, `2`, `3`, `5`
+If you use it normally it will output `4`, ***`1`***, ***`2`***, ***`3`***, `5`
 ```tsx
 return <>
   4
@@ -124,3 +124,6 @@ Like `splitProps()` but memoizes the whole local part
 
 ### `runWithContext()`
 Creates a context scope that persists for the duration of a function
+
+### `untrackCall()`
+Calls a function untracking what happens inside of it but not what gets passed as its argument
