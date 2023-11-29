@@ -40,7 +40,7 @@ const value = false;
 return <>
   <Debug value={value}>
     {/* (A LOT OF NESTING...) */}
-    <Show when={Debug.isDebug()}>
+    <Show when={Debug.read()}>
       THIS WOULD BE VISIBLE IF "value" HAD BEEN {true}
     </Show>
   </Debug>
@@ -116,14 +116,17 @@ return <>
 ## Utility functions
 Utility functions needed for the components above
 
+### `untrackCall()`
+Calls a function untracking what happens inside of it but not what gets passed as its argument
+
 ### `memoProps()`
 Creates a partial version of an object with memoized remaining properties
 
 ### `splitAndMemoProps()`
 Like `splitProps()` but memoizes the whole local part
 
+### `createOption()`
+Allows you to create simple reactive contexts; For example `Debug` is made with it
+
 ### `runWithContext()`
 Creates a context scope that persists for the duration of a function
-
-### `untrackCall()`
-Calls a function untracking what happens inside of it but not what gets passed as its argument

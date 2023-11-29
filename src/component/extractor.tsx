@@ -32,6 +32,7 @@ type Info = {
  *  </e.Joint>
  * <>
  * ```
+ * @param name Name to give to the context of the extractor
  */
 export function createExtractor(name = "extractor") {
     const ctx = createContext<Store>(undefined, { name });
