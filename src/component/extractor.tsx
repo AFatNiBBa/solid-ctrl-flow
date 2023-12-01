@@ -50,7 +50,7 @@ export function createExtractor(name = "extractor") {
          * Gets an {@link Accessor} that tells if the context in which THIS getter has been executed has been extracted (Is inside of a {@link Dest})
          * @returns Returns `null` if there is no parent {@link Joint}, the number of {@link Dest}s in which this component is being displayed otherwise (Usually 1)
          */
-        get isExtracted() {
+        get extracting() {
             const obj = useContext(ctx);
             return () => obj?.attached ?? null;
         }
