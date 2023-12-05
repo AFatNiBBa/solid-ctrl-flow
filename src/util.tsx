@@ -63,7 +63,7 @@ export function createOption<T>(init: NonNullable<T>, def = init, name?: string)
  * @returns The same thing {@link f} returned
  */
 export function runWithContext<T, R>(ctx: Context<T>, value: T, f: (x: T) => R) {
-	return createRoot(async d => {
+	return createRoot(d => {
 		try
         {
             getOwner()!.context = { [ctx.id]: value };
