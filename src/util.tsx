@@ -33,8 +33,9 @@ export function memoProps<T, K extends readonly (keyof T)[] = (keyof T)[]>(obj: 
  * @param keys The keys of the properties to memoize and to include in the first of the two objects
  */
 export function splitAndMemoProps<T extends object, K extends readonly (keyof T)[]>(obj: T, keys: K) {
-    const [ mine, other ] = splitProps(obj, keys);
-    return [ memoProps(mine, keys), other ] as const;
+    const out = splitProps(obj, keys);
+    out[0] = memoProps(out[0], keys);
+    return out;
 }
 
 /**
