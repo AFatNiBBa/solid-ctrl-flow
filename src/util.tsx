@@ -44,14 +44,14 @@ export function splitAndMemoProps<T extends object, K extends readonly (keyof T)
  * @param def Default value to set when calling the provider without one
  * @param name Name to give to the context
  */
-export function createOption<T>(init: NonNullable<T>, def = init, name?: string) {
+export function createOption<T>(init: T, def = init, name?: string) {
     const prop = "read";
     const ctx = createContext(() => init, { name });
     const provider = (props: { value?: T, children: JSX.Element }) => <ctx.Provider value={() => props.value ?? def} children={props.children} />;
     Object.defineProperty(provider, prop, { get: () => useContext(ctx) });
     return provider as typeof provider & {
         /** Returns the {@link Accessor} for the value in the current context */
-        [prop]: Accessor<NonNullable<T>>
+        [prop]: Accessor<T>
     };
 }
 
