@@ -112,6 +112,14 @@ return <>
   21
 </>
 ```
+Notice that you can use a `Source` component without adding it to the DOM:
+```tsx
+<myCustomExtractor.Source>
+  {/* This doesn't get returned, but still gets shown if there is an available "Dest" */}
+  Something
+</myCustomExtractor.Source>
+return <>Something else</>
+```
 
 ## Utility functions
 Utility functions needed for the components above

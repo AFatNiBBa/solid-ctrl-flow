@@ -70,7 +70,7 @@ function Dest(this: Context<Store | undefined>) {
     </>
 }
 
-/** Puts its content inside of a {@link Dest} if it is available */
+/** Puts its content inside of a {@link Dest} if it is available; There is no need to include this component on the DOM tree */
 function Source(this: Context<Store | undefined>, props: Info) {
     const obj = useContext(this);
     if (!obj) return props.children;
