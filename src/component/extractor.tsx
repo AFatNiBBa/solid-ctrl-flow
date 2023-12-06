@@ -37,13 +37,13 @@ type Info = {
 export function createExtractor(name = "extractor") {
     const ctx = createContext<Store>(undefined, { name });
     return {
-        /** Bound {@link Dest} */
+        /** Shows the content of the closest {@link Source} child of the closest {@link Joint} ancestor of this component */
         Dest: Dest.bind(ctx),
 
-        /** Bound {@link Source} */
+        /** Puts its content inside of a {@link Dest} if it is available; There is no need to include this component on the DOM tree */
         Source: Source.bind(ctx),
 
-        /** Bound {@link Joint} */
+        /** Allows {@link Dest} and {@link Source} childrens to communicate with each other  */
         Joint: Joint.bind(ctx),
 
         /**
@@ -57,7 +57,7 @@ export function createExtractor(name = "extractor") {
     }
 }
 
-/** Shows the content of the closest {@link Source} child of the closest {@link Joint} ancestor of this component */
+/** Unbound destination component */
 function Dest(this: Context<Store | undefined>) {
     const obj = useContext(this);
     if (!obj) return;
@@ -70,7 +70,7 @@ function Dest(this: Context<Store | undefined>) {
     </>
 }
 
-/** Puts its content inside of a {@link Dest} if it is available; There is no need to include this component on the DOM tree */
+/** Unbound source component */
 function Source(this: Context<Store | undefined>, props: Info) {
     const obj = useContext(this);
     if (!obj) return props.children;
@@ -81,7 +81,7 @@ function Source(this: Context<Store | undefined>, props: Info) {
     return <Show when={!obj.attached} children={info.children} />
 }
 
-/** Allows {@link Dest} and {@link Source} childrens to communicate with each other  */
+/** Unbound joint component */
 function Joint(this: Context<Store | undefined>, props: { children: JSX.Element }) {
     const { Provider } = this;
     const obj = createMutable<Store>({ attached: 0, source: [] });
