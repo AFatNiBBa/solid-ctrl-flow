@@ -40,7 +40,9 @@ export function splitAndMemoProps<T extends object, K extends readonly (keyof T)
 
 /**
  * Creates a context with a reactive value.
- * It returns the provider directly
+ * Returns a provider with additional fields:
+ * - The `read` getter, which returns an {@link Accessor} to the value
+ * - The `runWith()` method, which executes {@link runWithContext} on the option
  * @param init Initial value for the context
  * @param def Default value to set when calling the provider without one
  * @param name Name to give to the context
@@ -50,6 +52,10 @@ export function createOption<T>(init: T, def = init, name?: string) {
     const ctx = createContext(() => init, { name });
     const provider = (props: { value?: T, children: JSX.Element }) => <ctx.Provider value={() => props.value ?? def} children={props.children} />;
     Object.defineProperty(provider, prop, { get: () => useContext(ctx) });
+
+    /** Executes {@link runWithContext} on the provided option */
+    provider.runWith = <V extends T, R>(x: V, f: (x: V) => R) => runWithContext(ctx, () => x, () => f(x));
+
     return provider as typeof provider & {
         /** Returns the {@link Accessor} for the value in the current context */
         [prop]: Accessor<T>
