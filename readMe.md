@@ -121,6 +121,22 @@ Notice that you can use a `Source` component without adding it to the DOM:
 return <>Something else</>
 ```
 
+## Bindings
+Functions that create bindings between `Signal`s
+
+### `toSetter()`
+Creates a full-fledged solid `Setter` from a normal one
+
+### `toSignal()`
+Creates a `Signal` from a property of an object
+
+### `bind()`
+Creates a one-way binding between two `Signal`s
+
+### `bindTwoWay()`
+Creates a two-way binding between two `Signal`s
+
+
 ## Utility functions
 Utility functions needed for the components above
 
