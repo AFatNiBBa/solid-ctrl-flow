@@ -44,9 +44,10 @@ export function splitAndMemoProps<T extends object, K extends readonly (keyof T)
  * @param f A reactive resource fetcher
  */
 export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
+    var refetch: () => void;
     const memo = createMemo(f);
-    const [ get, { refetch } ] = createResource(memo);
-    createEffect(on<R, true>(memo, (_x, _prev, ok) => (ok && refetch(), true)));
+    createEffect(on(memo, () => refetch?.()));
+    const [ get ] = [ , { refetch } ] = createResource(memo);
     return get as Resource<Awaited<R>>;
 }
 
