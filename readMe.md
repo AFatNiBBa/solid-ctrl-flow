@@ -149,6 +149,9 @@ Creates a partial version of an object with memoized remaining properties
 ### `splitAndMemoProps()`
 Like `splitProps()` but memoizes the whole local part
 
+### `createReactiveResource()`
+Like `createResource()` but the provided function will be reactive
+
 ### `createOption()`
 Allows you to create simple reactive contexts; For example `Debug` is made with it
 

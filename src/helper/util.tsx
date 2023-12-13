@@ -1,5 +1,5 @@
 
-import { Accessor, Context, JSX, createContext, createMemo, createRoot, getOwner, splitProps, untrack } from "solid-js";
+import { Accessor, Context, EffectFunction, JSX, Resource, createContext, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
 import { useContext } from "solid-js";
 
 /**
@@ -28,7 +28,7 @@ export function memoProps<T, K extends readonly (keyof T)[] = (keyof T)[]>(obj: 
 }
 
 /**
- * Esecutes {@link splitProps} and memoizes the first of the two returned objects
+ * Executes {@link splitProps} and memoizes the first of the two returned objects
  * @param obj Object to split and partially memoize
  * @param keys The keys of the properties to memoize and to include in the first of the two objects
  */
@@ -36,6 +36,18 @@ export function splitAndMemoProps<T extends object, K extends readonly (keyof T)
     const out = splitProps(obj, keys);
     out[0] = memoProps(out[0], keys);
     return out;
+}
+
+/**
+ * Creates a {@link Resource} from the function {@link f}.
+ * The resource will be refetched each time one of the dependencies of {@link f} changes
+ * @param f A reactive resource fetcher
+ */
+export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
+    const memo = createMemo(f);
+    const [ get, { refetch } ] = createResource(memo);
+    createEffect(on<R, true>(memo, (_x, _prev, ok) => (ok && refetch(), true)));
+    return get as Resource<Awaited<R>>;
 }
 
 /**
