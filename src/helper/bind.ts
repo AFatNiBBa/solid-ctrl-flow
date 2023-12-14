@@ -8,28 +8,6 @@ const IDENTITY = (x: any) => x;
 export type Convert<S, D> = (x: S, prev: D) => D;
 
 /**
- * Creates a full-fledged solid {@link Setter} from a normal one
- * @param get The getter of the {@link Signal}; It's needed when a function gets passed to the new setter
- * @param set The simple setter to which to add functionalities
- */
-export function toSetter<T>(get: Accessor<T>, set: (x: T) => void): Setter<T> {
-    return (x?) => {
-        const out = typeof x === "function" ? (x as any)(untrack(get)) : x;
-        return set(out), out;
-    };
-}
-
-/**
- * Creates a {@link Signal} from a property access
- * @param obj The object from which to get the property
- * @param k The key of the property
- */
-export function toSignal<T, K extends keyof T>(obj: T, k: K): Signal<T[K]> {
-    const get = () => obj[k];
-    return [ get, toSetter(get, v => obj[k] = v) ];
-}
-
-/**
  * Creates a one-way binding between two {@link Signal}s
  * @param source The source of the binding
  * @param dest The destination of the binding
@@ -57,4 +35,34 @@ export function bindTwoWay<S, D>(source: Signal<S>, dest: Signal<D>, to: Convert
     const a = bind(source, dest, to);   // dest = source
     const b = bind(dest, source, from); // source = dest (source)
     return () => (a(), b());
+}
+
+/**
+ * Creates a full-fledged solid {@link Setter} from a normal one
+ * @param get The getter of the {@link Signal}; It's needed when a function gets passed to the new setter
+ * @param set The simple setter to which to add functionalities
+ */
+export function toSetter<T>(get: Accessor<T>, set: (x: T) => void): Setter<T> {
+    return (x?) => {
+        const out = typeof x === "function" ? (x as any)(untrack(get)) : x;
+        return set(out), out;
+    };
+}
+
+/**
+ * Creates a {@link Signal} from a property access
+ * @param obj The object from which to get the property
+ * @param k The key of the property
+ */
+export function toSignal<T, K extends keyof T>(obj: T, k: K): Signal<T[K]> {
+    const get = () => obj[k];
+    return [ get, toSetter(get, v => obj[k] = v) ];
+}
+
+/**
+ * Calls {@link f} maintaining its reactivity
+ * @param f An {@link Accessor} to a {@link Signal}
+ */
+export function unwrapSignal<T>(f: Accessor<Signal<T>>): Signal<T> {
+    return [ () => f()[0](), (x?) => f()[1](x!) ];
 }

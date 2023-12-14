@@ -124,18 +124,20 @@ return <>Something else</>
 ## Bindings
 Functions that create bindings between `Signal`s
 
-### `toSetter()`
-Creates a full-fledged solid `Setter` from a normal one
-
-### `toSignal()`
-Creates a `Signal` from a property of an object
-
 ### `bind()`
 Creates a one-way binding between two `Signal`s
 
 ### `bindTwoWay()`
 Creates a two-way binding between two `Signal`s
 
+### `toSetter()`
+Creates a full-fledged solid `Setter` from a normal one
+
+### `toSignal()`
+Creates a `Signal` from a property of an object
+
+### `unwrapSignal()`
+Calls an `Accessor` to a `Signal` maintaining its reactivity
 
 ## Utility functions
 Utility functions needed for the components above
