@@ -51,12 +51,12 @@ export function toSetter<T>(get: Accessor<T>, set: (x: T) => void): Setter<T> {
 
 /**
  * Creates a {@link Signal} from a property access
- * @param obj The object from which to get the property
- * @param k The key of the property
+ * @param obj The {@link Accessor} to the object from which to get the property
+ * @param k The {@link Accessor} to the key of the property
  */
-export function toSignal<T, K extends keyof T>(obj: T, k: K): Signal<T[K]> {
-    const get = () => obj[k];
-    return [ get, toSetter(get, v => obj[k] = v) ];
+export function toSignal<T, K extends keyof T>(obj: Accessor<T>, k: Accessor<K>): Signal<T[K]> {
+    const get = () => obj()[k()];
+    return [ get, toSetter(get, v => obj()[k()] = v) ];
 }
 
 /**
