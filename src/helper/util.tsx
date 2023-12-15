@@ -11,7 +11,7 @@ import { useContext } from "solid-js";
  * @returns The same thing {@link f} returned
  */
 export function untrackCall<F extends (...args: any[]) => any>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
-    return untrack(() => f.apply(this, args));
+    return untrack(() => f.apply(this, args) as ReturnType<F>);
 }
 
 /**
