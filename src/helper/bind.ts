@@ -60,6 +60,16 @@ export function toSignal<T, K extends keyof T>(obj: Accessor<T>, k: Accessor<K>)
 }
 
 /**
+ * Returns a {@link Signal} that applies the `??=` operator to the input one.
+ * If the getter of {@link param0} is like "x", then the result one is like "(x ??= {@link f}())"
+ * @param param0 The {@link Signal} to which to coalesce the getter
+ * @param f A function that creates a new {@link T}
+ */
+export function coalesceSignal<T>([ get, set ]: Signal<T | undefined>, f: Accessor<T>): Signal<T> {
+    return [ () => get() ?? set(f), set as Setter<T> ];
+}
+
+/**
  * Calls {@link f} maintaining its reactivity
  * @param f An {@link Accessor} to a {@link Signal}
  */

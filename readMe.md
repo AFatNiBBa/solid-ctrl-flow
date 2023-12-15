@@ -136,6 +136,9 @@ Creates a full-fledged solid `Setter` from a normal one
 ### `toSignal()`
 Creates a `Signal` from a property of an object
 
+### `coalesceSignal()`
+Creates a non nullable `Signal` from a nullable one
+
 ### `unwrapSignal()`
 Calls an `Accessor` to a `Signal` maintaining its reactivity
 
