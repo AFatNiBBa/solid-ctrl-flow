@@ -8,7 +8,11 @@ const IDENTITY = (x: any) => x;
 export type Convert<S, D> = (x: S, prev: D) => D;
 
 /**
- * Creates a one-way binding between two {@link Signal}s
+ * Creates a one-way binding between two {@link Signal}s.
+ * The function uses {@link createRenderEffect}, which means that:
+ * - As soon as the function is done executing the two {@link Signal}s will have the same value
+ * - If {@link source} changes, {@link dest} wont be instantly updated
+ * - If the current owner gets disposed before {@link dest} is updated, it never will
  * @param source The source of the binding
  * @param dest The destination of the binding
  * @param to Conversion function from {@link S} to {@link D}
@@ -22,7 +26,7 @@ export function bind<S, D>([ get ]: Signal<S>, [ , set ]: Signal<D>, to: Convert
 }
 
 /**
- * Creates a two-way binding between two {@link Signal}s
+ * Creates a two-way binding between two {@link Signal}s calling {@link bind} two times
  * @param source The source of the binding
  * @param dest The destination of the binding
  * @param to Conversion function from {@link S} to {@link D}
