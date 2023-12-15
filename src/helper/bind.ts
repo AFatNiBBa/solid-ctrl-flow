@@ -1,5 +1,5 @@
 
-import { Accessor, Setter, Signal, createEffect, createRoot, on, onCleanup, untrack } from "solid-js";
+import { Accessor, Setter, Signal, createRenderEffect, createRoot, on, onCleanup, untrack } from "solid-js";
 
 /** Conversion function that does nothing */
 const IDENTITY = (x: any) => x;
@@ -16,8 +16,8 @@ export type Convert<S, D> = (x: S, prev: D) => D;
  */
 export function bind<S>(source: Signal<S>, dest: Signal<S>): () => void;
 export function bind<S, D>(source: Signal<S>, dest: Signal<D>, to: Convert<S, D>): () => void;
-export function bind<S, D>(source: Signal<S>, dest: Signal<D>, to: Convert<S, D> = IDENTITY) {
-    const d = createRoot(d => (createEffect(on(source[0], x => dest[1](prev => to(x, prev)))), d));
+export function bind<S, D>([ get ]: Signal<S>, [ , set ]: Signal<D>, to: Convert<S, D> = IDENTITY) {
+    const d = createRoot(d => (createRenderEffect(on(get, x => set(prev => to(x, prev)))), d));
     return onCleanup(d), d;
 }
 
