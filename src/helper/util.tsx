@@ -1,6 +1,8 @@
 
-import { Accessor, Context, EffectFunction, JSX, Resource, createContext, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
+import { Accessor, Context, EffectFunction, JSX, Ref, Resource, createContext, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
 import { useContext } from "solid-js";
+
+//#region CALL
 
 /**
  * Executes {@link f} untracking it.
@@ -13,6 +15,24 @@ import { useContext } from "solid-js";
 export function untrackCall<F extends (...args: any[]) => any>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
     return untrack(() => f.apply(this, args) as ReturnType<F>);
 }
+
+/**
+ * Executes a {@link Ref}.
+ * Throws a {@link ReferenceError} if {@link ref} its not a function at runtime (Which should never be the case thanks to the solid compiler)
+ * @param ref The function to execute
+ * @param value The value to pass to the function
+ * @returns The same value of {@link value}
+ */
+export function refCall<T, U extends T = T>(ref: Ref<T> | undefined, value: U): U {
+    if (!ref) return value;
+    if (typeof ref !== "function") throw new ReferenceError('Il parametro "ref" deve essere stato compilato in una funzione a runtime');
+    (ref as any)(value);
+    return value;
+}
+
+//#endregion
+
+//#region PROPS
 
 /**
  * Memoizes some of the properties of {@link obj}
@@ -38,18 +58,9 @@ export function splitAndMemoProps<T extends object, K extends readonly (keyof T)
     return out;
 }
 
-/**
- * Creates a {@link Resource} from the function {@link f}.
- * The resource will be refetched each time one of the dependencies of {@link f} changes
- * @param f A reactive resource fetcher
- */
-export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
-    var refetch: () => void;
-    const memo = createMemo(f);
-    createEffect(on(memo, () => refetch?.()));
-    const [ get ] = [ , { refetch } ] = createResource(memo);
-    return get as Resource<Awaited<R>>;
-}
+//#endregion
+
+//#region CONTEXT
 
 /**
  * Creates a context with a reactive value.
@@ -94,4 +105,19 @@ export function runWithContext<T, R>(ctx: Context<T>, value: T, f: (x: T) => R) 
         }
 		catch (ex) { throw d(), ex; }
 	});
+}
+
+//#endregion
+
+/**
+ * Creates a {@link Resource} from the function {@link f}.
+ * The resource will be refetched each time one of the dependencies of {@link f} changes
+ * @param f A reactive resource fetcher
+ */
+export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
+    var refetch: () => void;
+    const memo = createMemo(f);
+    createEffect(on(memo, () => refetch?.()));
+    const [ get ] = [ , { refetch } ] = createResource(memo);
+    return get as Resource<Awaited<R>>;
 }

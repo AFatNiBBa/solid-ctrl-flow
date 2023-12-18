@@ -47,6 +47,15 @@ return <>
 </>
 ```
 
+### `Doc`
+Gives back the current document
+```tsx
+var doc: Document;
+return <>
+  <Doc ref={doc} />
+</>
+```
+
 ### `createExtractor()`
 Creates a context for components that may need to be out of their parent in certain conditions.
 If you have this component
@@ -148,17 +157,20 @@ Utility functions needed for the components above
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument
 
+### `refCall()`
+Executes a `Ref`
+
 ### `memoProps()`
 Creates a partial version of an object with memoized remaining properties
 
 ### `splitAndMemoProps()`
 Like `splitProps()` but memoizes the whole local part
 
-### `createReactiveResource()`
-Like `createResource()` but the provided function will be reactive
-
 ### `createOption()`
 Allows you to create simple reactive contexts; For example `Debug` is made with it
 
 ### `runWithContext()`
 Creates a context scope that persists for the duration of a function
+
+### `createReactiveResource()`
+Like `createResource()` but the provided function will be reactive
