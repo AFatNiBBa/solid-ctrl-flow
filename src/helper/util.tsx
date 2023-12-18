@@ -1,5 +1,5 @@
 
-import { Accessor, Context, EffectFunction, JSX, Ref, Resource, createContext, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
+import { Accessor, Context, EffectFunction, JSX, Owner, Ref, Resource, createContext, createEffect, createMemo, createResource, getOwner, on, runWithOwner, splitProps, untrack } from "solid-js";
 import { useContext } from "solid-js";
 
 //#region CALL
@@ -87,24 +87,18 @@ export function createOption<T>(init: T, def = init, name?: string) {
 }
 
 /**
- * Executes {@link f} with the provided {@link Context}
+ * Executes {@link f} with the provided value for the specified {@link Context}.
+ * You can pass `undefined` to {@link value} in order to get back the default value for {@link ctx}
  * @param ctx The context to which to set the value
  * @param value The value for the context
  * @param f The function to run
  * @returns The same thing {@link f} returned
  */
-export function runWithContext<T, R>(ctx: Context<T>, value: T, f: (x: T) => R) {
-	return createRoot(d => {
-		try
-        {
-            getOwner()!.context = { [ctx.id]: value };
-            const out = f(value);
-            if (out instanceof Promise)
-                return out.finally(d) as R;
-            return d(), out;
-        }
-		catch (ex) { throw d(), ex; }
-	});
+export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T | undefined) => R) {
+    const owner = getOwner();
+    const context = { ...owner?.context, [ctx.id]: value };
+	const temp: Owner = { context, owner, owned: null, cleanups: null };
+    return runWithOwner(temp, () => f(value)) as R;
 }
 
 //#endregion
