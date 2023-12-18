@@ -47,15 +47,6 @@ return <>
 </>
 ```
 
-### `Doc`
-Gives back the current document
-```tsx
-var doc: Document;
-return <>
-  <Doc ref={doc} />
-</>
-```
-
 ### `createExtractor()`
 Creates a context for components that may need to be out of their parent in certain conditions.
 If you have this component
