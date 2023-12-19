@@ -165,3 +165,6 @@ Creates a context scope that persists for the duration of a function
 
 ### `createReactiveResource()`
 Like `createResource()` but the provided function will be reactive
+
+### `runAndDispose()`
+Executes a function THEN calls a dispose callback; It works with async functions too

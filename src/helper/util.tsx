@@ -1,5 +1,5 @@
 
-import { Accessor, Context, EffectFunction, JSX, Owner, Ref, Resource, createContext, createEffect, createMemo, createResource, getOwner, on, runWithOwner, splitProps, untrack } from "solid-js";
+import { Accessor, Context, EffectFunction, JSX, Ref, Resource, createContext, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
 import { useContext } from "solid-js";
 
 //#region CALL
@@ -88,17 +88,20 @@ export function createOption<T>(init: T, def = init, name?: string) {
 
 /**
  * Executes {@link f} with the provided value for the specified {@link Context}.
- * You can pass `undefined` to {@link value} in order to get back the default value for {@link ctx}
+ * You can pass `undefined` to {@link value} in order to get back the default value for {@link ctx}.
+ * Everything that happens {@link f} will be disposed as soon as the execution ends
  * @param ctx The context to which to set the value
  * @param value The value for the context
  * @param f The function to run
  * @returns The same thing {@link f} returned
  */
 export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T | undefined) => R) {
-    const owner = getOwner();
-    const context = { ...owner?.context, [ctx.id]: value };
-	const temp: Owner = { context, owner, owned: null, cleanups: null };
-    return runWithOwner(temp, () => f(value)) as R;
+	return createRoot(d => {
+        return runAndDispose(d, () => {
+            (getOwner()!.context ??= {})[ctx.id] = value;
+            return f(value);
+        });
+    });
 }
 
 //#endregion
@@ -114,4 +117,18 @@ export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
     createEffect(on(memo, () => refetch?.()));
     const [ get ] = [ , { refetch } ] = createResource(memo);
     return get as Resource<Awaited<R>>;
+}
+
+/**
+ * Executes {@link f} and then calls {@link d} regardless of errors.
+ * If {@link f} returns a {@link Promise}, {@link d} will be called asynchronously
+ * @returns The same thing {@link f} returned
+ */
+export function runAndDispose<R>(d: () => void, f: () => R) {
+    try
+    {
+        const out = f();
+        return out instanceof Promise ? out.finally(d) as R : (d(), out);
+    }
+    catch (ex) { throw d(), ex; }
 }
