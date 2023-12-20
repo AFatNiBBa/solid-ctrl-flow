@@ -10,7 +10,7 @@ export default defineConfig({
         minify: false,
         target: "ESNext",
         lib: {
-            entry: join(__dirname, "src/index.ts"),
+            entry: join(__dirname, "src/index.tsx"),
             fileName: "index",
             name: "solidCtrlFlow"
         },
