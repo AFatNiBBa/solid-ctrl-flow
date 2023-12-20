@@ -47,6 +47,9 @@ return <>
 </>
 ```
 
+### `OptionalSuspense`
+Like a `Suspence`, but enables you to turn it off and show the loading state
+
 ### `createExtractor()`
 Creates a context for components that may need to be out of their parent in certain conditions.
 If you have this component
