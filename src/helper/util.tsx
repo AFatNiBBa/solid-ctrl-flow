@@ -97,10 +97,8 @@ export function createOption<T>(init: T, def = init, name?: string) {
  */
 export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T | undefined) => R) {
 	return createRoot(d => {
-        return runAndDispose(d, () => {
-            (getOwner()!.context ??= {})[ctx.id] = value;
-            return f(value);
-        });
+        try { return f((getOwner()!.context ??= {})[ctx.id] = value); }
+        finally { d(); }
     });
 }
 
@@ -108,7 +106,8 @@ export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (
 
 /**
  * Creates a {@link Resource} from the function {@link f}.
- * The resource will be refetched each time one of the dependencies of {@link f} changes
+ * The resource will be refetched each time one of the dependencies of {@link f} changes.
+ * The only dependant signals that will be tracked are the ones before the first `await`
  * @param f A reactive resource fetcher
  */
 export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
@@ -117,18 +116,4 @@ export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
     createEffect(on(memo, () => refetch?.()));
     const [ get ] = [ , { refetch } ] = createResource(memo);
     return get as Resource<Awaited<R>>;
-}
-
-/**
- * Executes {@link f} and then calls {@link d} regardless of errors.
- * If {@link f} returns a {@link Promise}, {@link d} will be called asynchronously
- * @returns The same thing {@link f} returned
- */
-export function runAndDispose<R>(d: () => void, f: () => R) {
-    try
-    {
-        const out = f();
-        return out instanceof Promise ? out.finally(d) as R : (d(), out);
-    }
-    catch (ex) { throw d(), ex; }
 }
