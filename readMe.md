@@ -34,20 +34,6 @@ return <>
 </>
 ```
 
-### `Debug`
-Allows you to define ui section that are only visible in debug or NOT in debug
-```tsx
-const value = false;
-return <>
-  <Debug value={value}>
-    {/* (A LOT OF NESTING...) */}
-    <Show when={Debug.isDebug()}>
-      THIS WOULD BE VISIBLE IF "value" HAD BEEN {true}
-    </Show>
-  </Debug>
-</>
-```
-
 ### `createExtractor()`
 Creates a context for components that may need to be out of their parent in certain conditions.
 If you have this component
@@ -122,6 +108,29 @@ Notice that you can use a `Source` component without adding it to the DOM:
 return <>Something else</>
 ```
 
+## Utility
+
+### Bindings
+Functions that create bindings between `Signal`s
+
+> #### `bind()`
+> Creates a one-way binding between two `Signal`s
+> 
+> #### `bindTwoWay()`
+> Creates a two-way binding between two `Signal`s
+> 
+> #### `toSetter()`
+> Creates a full-fledged solid `Setter` from a normal one
+> 
+> #### `toSignal()`
+> Creates a `Signal` from a property of an object
+> 
+> #### `coalesceSignal()`
+> Creates a non nullable `Signal` from a nullable one
+> 
+> #### `unwrapSignal()`
+> Calls an `Accessor` to a `Signal` maintaining its reactivity
+
 ### `ReactiveContext.create()`
 Method that creates a reactive version of a solid `Context` with some additional built-in functionalities
 ```ts
@@ -131,29 +140,19 @@ const valueAccessorForTheCurrentOwner = ctx.read;
 const value = ctx();
 ```
 
-## Bindings
-Functions that create bindings between `Signal`s
-
-### `bind()`
-Creates a one-way binding between two `Signal`s
-
-### `bindTwoWay()`
-Creates a two-way binding between two `Signal`s
-
-### `toSetter()`
-Creates a full-fledged solid `Setter` from a normal one
-
-### `toSignal()`
-Creates a `Signal` from a property of an object
-
-### `coalesceSignal()`
-Creates a non nullable `Signal` from a nullable one
-
-### `unwrapSignal()`
-Calls an `Accessor` to a `Signal` maintaining its reactivity
-
-## Utility functions
-Utility functions needed for the components above
+### `debug()`
+Allows you to define ui section that are only visible in debug or NOT in debug
+```tsx
+const value = false;
+return <>
+  <debug.Provider value={value}>
+    {/* (A LOT OF NESTING...) */}
+    <Show when={debug()}>
+      THIS WOULD BE VISIBLE IF "value" HAD BEEN {true}
+    </Show>
+  </debug.Provider>
+</>
+```
 
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument

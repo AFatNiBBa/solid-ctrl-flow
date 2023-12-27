@@ -1,7 +1,7 @@
 
 import { Switch, Match, JSX, Accessor } from "solid-js";
+import { ReactiveContext } from "../helper/context";
 import { splitAndMemoProps } from "../index";
-import { ReactiveContext } from "./reactiveCtx";
 
 /** Context for the {@link Case} and {@link When} components */
 const ctx = ReactiveContext.create(undefined, "case-when");

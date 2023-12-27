@@ -2,11 +2,14 @@
 import { Accessor, Context, JSX, Owner, createContext, createMemo, useContext } from "solid-js";
 import { runWithContext } from "..";
 
+/** Type hack for making {@link ReactiveContext} implement {@link Accessor} */
+const BASE_CTOR = Function as unknown as new<T>() => Accessor<T>;
+
 /**
  * Reactive {@link Context} with some additional built-in functionalities.
  * The call signature returns the value in the current {@link Owner} (It's like calling {@link read})
  */
-export abstract class ReactiveContext<T> extends (Function as unknown as new<T>() => Accessor<T>)<T> {
+export abstract class ReactiveContext<T> extends BASE_CTOR<T> {
     /** The actual {@link Context} that contains the reactive {@link Accessor} to the value */
     abstract ctx: Context<Accessor<T>>;
 

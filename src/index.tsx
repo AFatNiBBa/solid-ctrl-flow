@@ -1,7 +1,11 @@
 
+import { ReactiveContext } from "./helper/context";
+
 export * from "./component/case";
-export * from "./component/debug";
 export * from "./component/extractor";
-export * from "./component/reactiveCtx";
 export * from "./helper/bind";
+export * from "./helper/context";
 export * from "./helper/util";
+
+/** Built-in {@link ReactiveContext} which allows you to display different things in debug mode */
+export const debug = ReactiveContext.create(false, "debug-scope");
