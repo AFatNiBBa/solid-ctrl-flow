@@ -1,9 +1,10 @@
 
-import { Switch, Match, createContext, useContext, JSX, createMemo, Accessor } from "solid-js";
+import { Switch, Match, JSX, Accessor } from "solid-js";
 import { splitAndMemoProps } from "../index";
+import { ReactiveContext } from "./reactiveCtx";
 
-/** Context for the {@link Case}s that contains a memoized {@link Accessor} to the value */
-const ctx = createContext<() => any>(() => undefined, { name: "case-when" });
+/** Context for the {@link Case} and {@link When} components */
+const ctx = ReactiveContext.create(undefined, "case-when");
 
 /**
  * Allows the use of {@link When}s inside of {@link Switch}es.
@@ -35,10 +36,7 @@ const ctx = createContext<() => any>(() => undefined, { name: "case-when" });
  * <>
  * ```
  */
-export function Case(props: { value: any, children: JSX.Element }) {
-    const memo = createMemo(() => props.value);
-    return <ctx.Provider value={memo} children={props.children} />
-}
+export const Case: (props: { value: any, children: JSX.Element }) => JSX.Element = ctx.Provider;
 
 /** Like a {@link Match} but gets the value from the closest {@link Case} ancestor */
 export function When(props: { value: unknown, children: JSX.Element }): JSX.Element;
@@ -51,7 +49,7 @@ export function When<T>(props: { pred: (x: any) => T, keyed: true, children: (x:
 
 export function When<T>(props: { value?: unknown, pred?: (x: any) => T }) {
     const [ mine, other ] = splitAndMemoProps(props, [ "value", "pred" ]);
-    const value = useContext(ctx);
+    const { read } = ctx;
     const pred = (x: unknown) => mine.pred ? mine.pred(x) : x === mine.value;
-    return <Match when={pred(value())} {...other as any} />
+    return <Match when={pred(read())} {...other as any} />
 }

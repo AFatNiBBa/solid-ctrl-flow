@@ -1,6 +1,7 @@
 
 # solid-ctrl-flow
-Control flow components for "solid-js"
+Control flow components for "solid-js".
+It's always under hard development
 
 ## Components
 
@@ -40,15 +41,12 @@ const value = false;
 return <>
   <Debug value={value}>
     {/* (A LOT OF NESTING...) */}
-    <Show when={Debug.read()}>
+    <Show when={Debug.isDebug()}>
       THIS WOULD BE VISIBLE IF "value" HAD BEEN {true}
     </Show>
   </Debug>
 </>
 ```
-
-### `OptionalSuspense`
-Like a `Suspence`, but enables you to turn it off and show the loading state
 
 ### `createExtractor()`
 Creates a context for components that may need to be out of their parent in certain conditions.
@@ -124,6 +122,15 @@ Notice that you can use a `Source` component without adding it to the DOM:
 return <>Something else</>
 ```
 
+### `ReactiveContext.create()`
+Method that creates a reactive version of a solid `Context` with some additional built-in functionalities
+```ts
+const ctx = ReactiveContext.create("SOMETHING");
+const underlyingNormalContext = ctx.ctx;
+const valueAccessorForTheCurrentOwner = ctx.read;
+const value = ctx();
+```
+
 ## Bindings
 Functions that create bindings between `Signal`s
 
@@ -159,9 +166,6 @@ Creates a partial version of an object with memoized remaining properties
 
 ### `splitAndMemoProps()`
 Like `splitProps()` but memoizes the whole local part
-
-### `createOption()`
-Allows you to create simple reactive contexts; For example `Debug` is made with it
 
 ### `runWithContext()`
 Creates a context scope that persists for the duration of a function

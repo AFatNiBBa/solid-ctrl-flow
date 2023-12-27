@@ -1,6 +1,5 @@
 
-import { Accessor, Context, EffectFunction, JSX, Ref, Resource, createContext, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
-import { useContext } from "solid-js";
+import { Context, EffectFunction, Ref, Resource, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
 
 //#region CALL
 
@@ -12,7 +11,7 @@ import { useContext } from "solid-js";
  * @param args Arguments for calling {@link f}
  * @returns The same thing {@link f} returned
  */
-export function untrackCall<F extends (...args: any[]) => any>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
+export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
     return untrack(() => f.apply(this, args) as ReturnType<F>);
 }
 
@@ -60,32 +59,6 @@ export function splitAndMemoProps<T extends object, K extends readonly (keyof T)
 
 //#endregion
 
-//#region CONTEXT
-
-/**
- * Creates a context with a reactive value.
- * Returns a provider with additional fields:
- * - The `read` getter, which returns an {@link Accessor} to the value
- * - The `runWith()` method, which executes {@link runWithContext} on the option
- * @param init Initial value for the context
- * @param def Default value to set when calling the provider without one
- * @param name Name to give to the context
- */
-export function createOption<T>(init: T, def = init, name?: string) {
-    const prop = "read";
-    const ctx = createContext(() => init, { name });
-    const provider = (props: { value?: T, children: JSX.Element }) => <ctx.Provider value={() => props.value ?? def} children={props.children} />;
-    Object.defineProperty(provider, prop, { get: () => useContext(ctx) });
-
-    /** Executes {@link runWithContext} on the provided option */
-    provider.runWith = <V extends T, R>(x: V, f: (x: V) => R) => runWithContext(ctx, () => x, () => f(x));
-
-    return provider as typeof provider & {
-        /** Returns the {@link Accessor} for the value in the current context */
-        [prop]: Accessor<T>
-    };
-}
-
 /**
  * Executes {@link f} with the provided value for the specified {@link Context}.
  * You can pass `undefined` to {@link value} in order to get back the default value for {@link ctx}.
@@ -95,14 +68,18 @@ export function createOption<T>(init: T, def = init, name?: string) {
  * @param f The function to run
  * @returns The same thing {@link f} returned
  */
-export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T | undefined) => R) {
+export function runWithContext<T, V extends T, R>(ctx: Context<T>, value: V, f: (x: V) => R): R;
+export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T) => R): R;
+export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T) => R) {
 	return createRoot(d => {
-        try { return f((getOwner()!.context ??= {})[ctx.id] = value); }
+        try
+        {
+            (getOwner()!.context ??= {})[ctx.id] = value;
+            return f(value === undefined ? ctx.defaultValue : value);
+        }
         finally { d(); }
     });
 }
-
-//#endregion
 
 /**
  * Creates a {@link Resource} from the function {@link f}.
