@@ -13,15 +13,15 @@ export type Convert<S, D> = (x: S, prev: D) => D;
  * - As soon as the function is done executing the two {@link Signal}s will have the same value
  * - If {@link source} changes, {@link dest} wont be instantly updated
  * - If the current owner gets disposed before {@link dest} is updated, it never will
- * @param source The source of the binding
- * @param dest The destination of the binding
+ * @param source The getter of the source of the binding
+ * @param dest The setter of the destination of the binding
  * @param to Conversion function from {@link S} to {@link D}
  * @returns A function that disposes the binding
  */
-export function bind<S>(source: Signal<S>, dest: Signal<S>): () => void;
-export function bind<S, D>(source: Signal<S>, dest: Signal<D>, to: Convert<S, D>): () => void;
-export function bind<S, D>([ get ]: Signal<S>, [ , set ]: Signal<D>, to: Convert<S, D> = IDENTITY) {
-    const d = createRoot(d => (createRenderEffect(on(get, x => set(prev => to(x, prev)))), d));
+export function bind<S>(source: Accessor<S>, dest: Setter<S>): () => void;
+export function bind<S, D>(source: Accessor<S>, dest: Setter<D>, to: Convert<S, D>): () => void;
+export function bind<S, D>(source: Accessor<S>, dest: Setter<D>, to: Convert<S, D> = IDENTITY) {
+    const d = createRoot(d => (createRenderEffect(on(source, x => dest(prev => to(x, prev)))), d));
     return onCleanup(d), d;
 }
 
@@ -35,9 +35,9 @@ export function bind<S, D>([ get ]: Signal<S>, [ , set ]: Signal<D>, to: Convert
  */
 export function bindTwoWay<S>(source: Signal<S>, dest: Signal<S>): () => void;
 export function bindTwoWay<S, D>(source: Signal<S>, dest: Signal<D>, to: Convert<S, D>, from: Convert<D, S>): () => void;
-export function bindTwoWay<S, D>(source: Signal<S>, dest: Signal<D>, to: Convert<S, D> = IDENTITY, from: Convert<D, S> = IDENTITY) {
-    const a = bind(source, dest, to);   // dest = source
-    const b = bind(dest, source, from); // source = dest (source)
+export function bindTwoWay<S, D>(source: Signal<S>, dest: Signal<D>, to?: Convert<S, D>, from?: Convert<D, S>) {
+    const a = bind(source[0], dest[1], to!);   // dest = source
+    const b = bind(dest[0], source[1], from!); // source = dest (source)
     return () => (a(), b());
 }
 
