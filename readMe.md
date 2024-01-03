@@ -6,7 +6,7 @@ It's always under hard development
 ## Components
 
 ### `Case` - `When`
-Allows you to not specify the full condition inside of a `Switch` component.
+Allows you to not repeat the same condition across many `Match` components.
 The following code
 ```tsx
 const value = 1;
@@ -31,6 +31,29 @@ return <>
     <Match when={`${value}`.length === 3}>Long</Match>
     <Match when>Default</Match>
   </Switch>
+</>
+```
+
+### `Nest`
+Like a `For`, but instead of putting an element after another it nests them.
+The following code
+```tsx
+return <>
+  <Nest each={[ "red", "green", "blue" ]} template={(x, y) => <div style={{ background: x, padding: "1ch" }}>{y()}</div>}>
+    content
+  </Nest>
+</>
+```
+Is equivalent to this
+```tsx
+return <>
+  <div style={{ background: "red", padding: "1ch" }}>
+    <div style={{ background: "green", padding: "1ch" }}>
+      <div style={{ background: "blue", padding: "1ch" }}>
+        content
+      </div>
+    </div>
+  </div>
 </>
 ```
 
