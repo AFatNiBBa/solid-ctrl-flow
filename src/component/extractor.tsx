@@ -73,11 +73,11 @@ function Dest(this: Context<Store | undefined>) {
 /** Unbound source component */
 function Source(this: Context<Store | undefined>, props: Info) {
     const obj = useContext(this);
-    if (!obj) return props.children;
+    if (!obj) return <>{props.children}</>;
     const order = createMemo(() => props.order || 0);
-    const info = { get order() { return order(); }, get children() { return props.children; } } satisfies Info; // Memoizes only "order"
+    const info = { get order() { return order(); }, get children() { return props.children; } } satisfies Info;     // Memoizes only "order"
     obj.source.push(info);
-    onCleanup(() => obj.source.splice(obj.source.indexOf(info), 1));
+    onCleanup(() => obj.source.splice(obj.source.indexOf(createMutable(info)), 1));                                 // Serve "createMutable()" perchè quando "info" viene inserito nell'array (Che è un mutable) viene wrappato in una proxy, quindi non lo troverebbe; Eseguire più di una volta "createMutable()" sullo stesso oggetto restituisce la stessa proxy
     return <Show when={!obj.attached} children={info.children} />
 }
 
