@@ -1,5 +1,5 @@
 
-import { Context, EffectFunction, Ref, Resource, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
+import { Context, EffectFunction, MemoOptions, Ref, Resource, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
 
 //#region CALL
 
@@ -33,27 +33,35 @@ export function refCall<T, U extends T = T>(ref: Ref<T> | undefined, value: U): 
 
 //#region PROPS
 
+/** Handy type alias */
+type Equals = MemoOptions<unknown>["equals"];
+
 /**
- * Memoizes some of the properties of {@link obj}
- * If {@link keys} is not provided, memoizes everything that get returned by {@link Object.keys} when provided with {@link obj}
+ * Memoizes some of the properties of {@link obj}.
+ * If {@link keys} is not provided, memoizes everything that get returned by {@link Object.keys} when provided with {@link obj}.
+ * The {@link equals} parameter defaults to `false` to allow the specific reactive value to have control over when its dependant effects are triggered
  * @param obj Object to partially memoize
  * @param keys The keys of the properties to memoize
+ * @param equals The comparator function to use on the newly created memos
  */
-export function memoProps<T, K extends readonly (keyof T)[] = (keyof T)[]>(obj: T, keys: K = Object.keys(obj!) as unknown as K) {
+export function memoProps<T>(obj: T, keys?: undefined, equals?: Equals): T;
+export function memoProps<T, K extends readonly (keyof T)[]>(obj: T, keys: K, equals?: Equals): Pick<T, K[number]>;
+export function memoProps(obj: any, keys: PropertyKey[] = Object.keys(obj), equals: Equals = false) {
     const out = {};
     for (const elm of keys)
-        Object.defineProperty(out, elm, { enumerable: true, get: createMemo(() => obj[elm]) });
-    return out as Pick<T, K[number]>;
+        Object.defineProperty(out, elm, { enumerable: true, get: createMemo(() => obj[elm], undefined, { equals }) });
+    return out;
 }
 
 /**
- * Executes {@link splitProps} and memoizes the first of the two returned objects
+ * Executes {@link splitProps} and memoizes the first of the two returned objects using {@link memoProps}
  * @param obj Object to split and partially memoize
  * @param keys The keys of the properties to memoize and to include in the first of the two objects
+ * @param equals The comparator function to use on the newly created memos
  */
-export function splitAndMemoProps<T extends object, K extends readonly (keyof T)[]>(obj: T, keys: K) {
+export function splitAndMemoProps<T extends Record<any, any>, K extends readonly (keyof T)[]>(obj: T, keys: K, equals?: Equals) {
     const out = splitProps(obj, keys);
-    out[0] = memoProps(out[0], keys);
+    out[0] = memoProps(out[0], keys, equals);
     return out;
 }
 
