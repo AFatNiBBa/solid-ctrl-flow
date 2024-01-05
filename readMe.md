@@ -150,9 +150,6 @@ Functions that create bindings between `Signal`s
 > 
 > #### `coalesceSignal()`
 > Creates a non nullable `Signal` from a nullable one
-> 
-> #### `unwrapSignal()`
-> Calls an `Accessor` to a `Signal` maintaining its reactivity
 
 ### `ReactiveContext.create()`
 Method that creates a reactive version of a solid `Context` with some additional built-in functionalities
@@ -162,6 +159,12 @@ const underlyingNormalContext = ctx.ctx;
 const valueAccessorForTheCurrentOwner = ctx.read;
 const value = ctx();
 ```
+
+### `runWithContext()`
+Creates a context scope that persists for the duration of a function
+
+### `unwrap()`
+Calls an `Accessor` maintaining its reactivity
 
 ### `debug()`
 Allows you to define ui section that are only visible in debug or NOT in debug
@@ -188,9 +191,6 @@ Creates a partial version of an object with memoized remaining properties
 
 ### `splitAndMemoProps()`
 Like `splitProps()` but memoizes the whole local part
-
-### `runWithContext()`
-Creates a context scope that persists for the duration of a function
 
 ### `createReactiveResource()`
 Like `createResource()` but the provided function will be reactive

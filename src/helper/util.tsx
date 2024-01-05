@@ -1,5 +1,5 @@
 
-import { Context, EffectFunction, MemoOptions, Ref, Resource, createEffect, createMemo, createResource, createRoot, getOwner, on, splitProps, untrack } from "solid-js";
+import { EffectFunction, MemoOptions, Ref, Resource, createEffect, createMemo, createResource, on, splitProps, untrack } from "solid-js";
 
 //#region CALL
 
@@ -66,28 +66,6 @@ export function splitAndMemoProps<T extends Record<any, any>, K extends readonly
 }
 
 //#endregion
-
-/**
- * Executes {@link f} with the provided value for the specified {@link Context}.
- * You can pass `undefined` to {@link value} in order to get back the default value for {@link ctx}.
- * Everything that happens {@link f} will be disposed as soon as the execution ends
- * @param ctx The context to which to set the value
- * @param value The value for the context
- * @param f The function to run
- * @returns The same thing {@link f} returned
- */
-export function runWithContext<T, V extends T, R>(ctx: Context<T>, value: V, f: (x: V) => R): R;
-export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T) => R): R;
-export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T) => R) {
-	return createRoot(d => {
-        try
-        {
-            (getOwner()!.context ??= {})[ctx.id] = value;
-            return f(value === undefined ? ctx.defaultValue : value);
-        }
-        finally { d(); }
-    });
-}
 
 /**
  * Creates a {@link Resource} from the function {@link f}.

@@ -1,6 +1,6 @@
 
 import { Accessor, For, JSX, createSignal, mapArray, onCleanup, onMount } from "solid-js";
-import { memoProps } from "..";
+import { memoProps } from "../helper/util";
 
 /**
  * Like a {@link For}, but instead of putting an element after another it nests them.

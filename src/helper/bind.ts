@@ -72,11 +72,3 @@ export function toSignal<T, K extends keyof T>(obj: Accessor<T>, k: Accessor<K>)
 export function coalesceSignal<T>([ get, set ]: Signal<T | undefined>, f: Accessor<T>): Signal<T> {
     return [ () => get() ?? set(f), set as Setter<T> ];
 }
-
-/**
- * Calls {@link f} maintaining its reactivity
- * @param f An {@link Accessor} to a {@link Signal}
- */
-export function unwrapSignal<T>(f: Accessor<Signal<T>>): Signal<T> {
-    return [ () => f()[0](), (x?) => f()[1](x!) ];
-}
