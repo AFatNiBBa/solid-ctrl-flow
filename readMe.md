@@ -34,12 +34,44 @@ return <>
 </>
 ```
 
+### `Enfold`
+Eventually wraps its content into a template if a certain condition is met.
+The following code
+```tsx
+const value = true;
+return <>
+  <Enfold when={value} template={c => <div style={{ background: "red" }}>{c()}</div>}>
+    content
+  </Enfold>
+</>
+```
+Is equivalent to this
+```tsx
+return <>
+  <div style={{ background: "red" }}>
+    content
+  </div>
+</>
+```
+And if `value` was falsish, it would have been equivalent to this
+```tsx
+return <>content</>
+```
+If you are wrapping the content with a context provider you need to set the `unrecycled` attribute to `true` to run again the whole content, otherwise the `Owner` of the content won't be child of the template one
+```tsx
+return <>
+  <Enfold unrecycled when={value} template={c => <ctx.Provider value={2} children={c()} />}>
+    {useContext(ctx)}
+  </Enfold>
+</>
+```
+
 ### `Nest`
 Like a `For`, but instead of putting an element after another it nests them.
 The following code
 ```tsx
 return <>
-  <Nest each={[ "red", "green", "blue" ]} template={(x, y) => <div style={{ background: x, padding: "1ch" }}>{y()}</div>}>
+  <Nest each={[ "red", "green", "blue" ]} template={(c, x) => <div style={{ background: x, padding: "1ch" }}>{c()}</div>}>
     content
   </Nest>
 </>
@@ -150,6 +182,9 @@ Functions that create bindings between `Signal`s
 > 
 > #### `coalesceSignal()`
 > Creates a non nullable `Signal` from a nullable one
+> 
+> #### `unwrapSignal()`
+> A `Signal`-specific version of `unwrap()` that allows the destructuring of its result
 
 ### `ReactiveContext.create()`
 Method that creates a reactive version of a solid `Context` with some additional built-in functionalities
@@ -164,7 +199,7 @@ const value = ctx();
 Creates a context scope that persists for the duration of a function
 
 ### `unwrap()`
-Calls an `Accessor` maintaining its reactivity
+Calls an `Accessor` maintaining its reactivity at 1 level
 
 ### `debug()`
 Allows you to define ui section that are only visible in debug or NOT in debug
@@ -180,12 +215,6 @@ return <>
 </>
 ```
 
-### `untrackCall()`
-Calls a function untracking what happens inside of it but not what gets passed as its argument
-
-### `refCall()`
-Executes a `Ref`
-
 ### `memoProps()`
 Creates a partial version of an object with memoized remaining properties
 
@@ -194,3 +223,6 @@ Like `splitProps()` but memoizes the whole local part
 
 ### `createReactiveResource()`
 Like `createResource()` but the provided function will be reactive
+
+### `untrackCall()`
+Calls a function untracking what happens inside of it but not what gets passed as its argument

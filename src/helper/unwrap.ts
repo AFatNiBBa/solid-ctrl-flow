@@ -2,11 +2,11 @@
 import { Accessor } from "solid-js";
 
 /**
- * Calls an {@link Accessor} maintaining its reactivity
+ * Calls an {@link Accessor} maintaining its reactivity at 1 level
  * @param f The {@link Accessor} to the value to emulate
  * @returns A {@link Proxy} that copies the functionalities of the result of {@link f} calling it for each interaction, thus maintaining reactivity
  */
-export const unwrap = <T>(f: Accessor<T>) => <T>new Proxy(f, HANDLER);
+export const unwrap = <T extends object>(f: Accessor<T>) => <T>new Proxy(f, HANDLER);
 
 /**
  * The handler of the {@link Proxy} returned by {@link unwrap}.

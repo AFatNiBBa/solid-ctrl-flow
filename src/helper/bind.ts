@@ -1,5 +1,6 @@
 
 import { Accessor, Setter, Signal, createRenderEffect, createRoot, on, onCleanup, untrack } from "solid-js";
+import { unwrap } from "./unwrap";
 
 /** Conversion function that does nothing */
 const IDENTITY = (x: any) => x;
@@ -71,4 +72,20 @@ export function toSignal<T, K extends keyof T>(obj: Accessor<T>, k: Accessor<K>)
  */
 export function coalesceSignal<T>([ get, set ]: Signal<T | undefined>, f: Accessor<T>): Signal<T> {
     return [ () => get() ?? set(f), set as Setter<T> ];
+}
+
+/**
+ * Calls {@link f} maintaining its reactivity at 2 levels.
+ * Unlike the normal {@link unwrap}, this maintains reactivity on the elements of the array too, which means that it can be destructured
+ * ```ts
+ * const first = unwrap(f);         // The value of "first" is reactive but CANNOT be destructured
+ * const [ getFirst ] = first;      // The value of "getFirst" is NOT reactive, it's the first element of the CURRENT signal returned by "f"
+ * 
+ * const second = unwrapSignal(f);  // The value of "second" is reactive and CAN be destructured
+ * const [ getSecond ] = second;    // The value of "getSecond" IS reactive, it's a function that calls "f", gets the first element and calls that too
+ * ```
+ * @param f An {@link Accessor} to a {@link Signal}
+ */
+export function unwrapSignal<T>(f: Accessor<Signal<T>>): Signal<T> {
+    return [ () => f()[0](), (x?) => f()[1](x!) ];
 }

@@ -1,35 +1,5 @@
 
-import { EffectFunction, MemoOptions, Ref, Resource, createEffect, createMemo, createResource, on, splitProps, untrack } from "solid-js";
-
-//#region CALL
-
-/**
- * Executes {@link f} untracking it.
- * Due to the fact that the function is passed as input, it does not untrack its changes (It's intentional)
- * @param this The same thing that {@link f} wants as `this`
- * @param f The function to call
- * @param args Arguments for calling {@link f}
- * @returns The same thing {@link f} returned
- */
-export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
-    return untrack(() => f.apply(this, args) as ReturnType<F>);
-}
-
-/**
- * Executes a {@link Ref}.
- * Throws a {@link ReferenceError} if {@link ref} its not a function at runtime (Which should never be the case thanks to the solid compiler)
- * @param ref The function to execute
- * @param value The value to pass to the function
- * @returns The same value of {@link value}
- */
-export function refCall<T, U extends T = T>(ref: Ref<T> | undefined, value: U): U {
-    if (!ref) return value;
-    if (typeof ref !== "function") throw new ReferenceError('Il parametro "ref" deve essere stato compilato in una funzione a runtime');
-    (ref as any)(value);
-    return value;
-}
-
-//#endregion
+import { EffectFunction, MemoOptions, Resource, createEffect, createMemo, createResource, on, splitProps, untrack } from "solid-js";
 
 //#region PROPS
 
@@ -79,4 +49,16 @@ export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
     createEffect(on(memo, () => refetch?.()));
     const [ get ] = [ , { refetch } ] = createResource(memo);
     return get as Resource<Awaited<R>>;
+}
+
+/**
+ * Executes {@link f} untracking it.
+ * Due to the fact that the function is passed as input, it does not untrack its changes (It's intentional)
+ * @param this The same thing that {@link f} wants as `this`
+ * @param f The function to call
+ * @param args Arguments for calling {@link f}
+ * @returns The same thing {@link f} returned
+ */
+export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
+    return untrack(() => f.apply(this, args) as ReturnType<F>);
 }
