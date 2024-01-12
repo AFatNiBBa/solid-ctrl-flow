@@ -1,8 +1,9 @@
 
-import { Accessor } from "solid-js";
+import { Accessor, Setter } from "solid-js";
 
 /**
- * Calls an {@link Accessor} maintaining its reactivity at 1 level
+ * Calls an {@link Accessor} maintaining its reactivity at 1 level.
+ * The `typeof` operator on the output returns `"function"`, so you have to wrap it if you use it in, for example, in a {@link Setter} and you don't want it to be invoked
  * @param f The {@link Accessor} to the value to emulate
  * @returns A {@link Proxy} that copies the functionalities of the result of {@link f} calling it for each interaction, thus maintaining reactivity
  */

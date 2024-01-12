@@ -17,12 +17,13 @@ export type Convert<S, D> = (x: S, prev: D) => D;
  * @param source The getter of the source of the binding
  * @param dest The setter of the destination of the binding
  * @param to Conversion function from {@link S} to {@link D}
+ * @param skip If it is `true`, {@link dest} won't be executed until the next change
  * @returns A function that disposes the binding
  */
-export function bind<S>(source: Accessor<S>, dest: Setter<S>): () => void;
-export function bind<S, D>(source: Accessor<S>, dest: Setter<D>, to: Convert<S, D>): () => void;
-export function bind<S, D>(source: Accessor<S>, dest: Setter<D>, to: Convert<S, D> = IDENTITY) {
-    const d = createRoot(d => (createRenderEffect(on(source, x => dest(prev => to(x, prev)))), d));
+export function bind<S>(source: Accessor<S>, dest: Setter<S>, to?: undefined, skip?: boolean): () => void;
+export function bind<S, D>(source: Accessor<S>, dest: Setter<D>, to: Convert<S, D>, skip?: boolean): () => void;
+export function bind<S, D>(source: Accessor<S>, dest: Setter<D>, to: Convert<S, D> = IDENTITY, skip = false) {
+    const d = createRoot(d => (createRenderEffect(on(source, x => skip ? skip = false : dest(prev => to(x, prev)))), d));
     return onCleanup(d), d;
 }
 
@@ -37,8 +38,8 @@ export function bind<S, D>(source: Accessor<S>, dest: Setter<D>, to: Convert<S, 
 export function bindTwoWay<S>(source: Signal<S>, dest: Signal<S>): () => void;
 export function bindTwoWay<S, D>(source: Signal<S>, dest: Signal<D>, to: Convert<S, D>, from: Convert<D, S>): () => void;
 export function bindTwoWay<S, D>(source: Signal<S>, dest: Signal<D>, to?: Convert<S, D>, from?: Convert<D, S>) {
-    const a = bind(source[0], dest[1], to!);   // dest = source
-    const b = bind(dest[0], source[1], from!); // source = dest (source)
+    const a = bind(source[0], dest[1], to!);
+    const b = bind(dest[0], source[1], from!, true);
     return () => (a(), b());
 }
 
