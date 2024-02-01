@@ -7,6 +7,7 @@ export * from "./component/extractor";
 export * from "./component/nest";
 export * from "./helper/bind";
 export * from "./helper/context";
+export * from "./helper/slot";
 export * from "./helper/unwrap";
 export * from "./helper/util";
 

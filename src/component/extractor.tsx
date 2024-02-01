@@ -1,12 +1,13 @@
 
 import { Context, For, JSX, Show, createContext, createMemo, onCleanup, useContext } from "solid-js";
 import { createMutable } from "solid-js/store";
+import { Slot } from "../helper/slot";
 
 /** Type of the data stored in each context created by {@link createExtractor} */
 type Store = { attached: number, source: Info[] };
 
 /** Informations about a {@link Source} component */
-type Info = {
+type Info = Slot & {
     /** Order of the current source if there are many */
     order?: number,
     children: JSX.Element
@@ -25,8 +26,8 @@ type Info = {
  *      </div>
  *      <div id="something-else">
  *          <e.Source>
- *              This text will be shown instead of "e.Dest".
- *              If there weren't to be any "e.Joint" ancestor, then this text would have stayed here
+ *              This text will be shown instead of `e.Dest`.
+ *              If there weren't to be any `e.Joint` ancestor, then this text would have stayed here
  *          </e.Source>
  *      </div>
  *  </e.Joint>
@@ -64,7 +65,8 @@ function Dest(this: Context<Store | undefined>) {
     obj.attached++;
     onCleanup(() => obj.attached--);
     return <>
-        <For each={obj.source.sort((a, b) => a.order! - b.order!)}>
+        {/* It's important to clone `obj.source` before sorting it, otherwise the indexes of the slots would be fucked up */}
+        <For each={obj.source.toSorted((a, b) => a.order! - b.order!)}>
             {x => <>{x.children}</>}
         </For>
     </>
@@ -75,15 +77,15 @@ function Source(this: Context<Store | undefined>, props: Info) {
     const obj = useContext(this);
     if (!obj) return <>{props.children}</>;
     const order = createMemo(() => props.order || 0);
-    const info = { get order() { return order(); }, get children() { return props.children; } } satisfies Info;     // Memoizes only "order"
-    obj.source.push(info);
-    onCleanup(() => obj.source.splice(obj.source.indexOf(createMutable(info)), 1));                                 // Serve "createMutable()" perchè quando "info" viene inserito nell'array (Che è un mutable) viene wrappato in una proxy, quindi non lo troverebbe; Eseguire più di una volta "createMutable()" sullo stesso oggetto restituisce la stessa proxy
+    const info = { get order() { return order(); }, get children() { return props.children; } } satisfies Info;     // Memoizes only `order`
+    Slot.push(obj.source, info);
+    onCleanup(() => Slot.remove(obj.source, info));
     return <Show when={!obj.attached} children={info.children} />
 }
 
 /** Unbound joint component */
 function Joint(this: Context<Store | undefined>, props: { children: JSX.Element }) {
     const { Provider } = this;
-    const obj = createMutable<Store>({ attached: 0, source: [] });
+    const obj = createMutable<Store>({ attached: 0, source: [] });                                                  // The `source` property is needed to be an array in order to make it mutable
     return <Provider value={obj} children={props.children} />
 }

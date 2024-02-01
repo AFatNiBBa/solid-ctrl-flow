@@ -67,7 +67,7 @@ export function toSignal<T, K extends keyof T>(obj: Accessor<T>, k: Accessor<K>)
 
 /**
  * Returns a {@link Signal} that applies the `??=` operator to the input one.
- * If the getter of {@link param0} is like "x", then the result one is like "(x ??= {@link f}())"
+ * If the getter of {@link param0} is like `x`, then the result one is like "(x ??= {@link f}())"
  * @param param0 The {@link Signal} to which to coalesce the getter
  * @param f An {@link Accessor} to the value to use when there's a nullish value
  */
@@ -79,11 +79,11 @@ export function coalesceSignal<T>([ get, set ]: Signal<T | undefined>, f: Access
  * Calls {@link f} maintaining its reactivity at 2 levels.
  * Unlike the normal {@link unwrap}, this maintains reactivity on the elements of the array too, which means that it can be destructured
  * ```ts
- * const first = unwrap(f);         // The value of "first" is reactive but CANNOT be destructured
- * const [ getFirst ] = first;      // The value of "getFirst" is NOT reactive, it's the first element of the CURRENT signal returned by "f"
+ * const first = unwrap(f);         // The value of `first` is reactive but CANNOT be destructured
+ * const [ getFirst ] = first;      // The value of `getFirst()` is NOT reactive, it's the first element of the CURRENT signal returned by `f()`
  * 
- * const second = unwrapSignal(f);  // The value of "second" is reactive and CAN be destructured
- * const [ getSecond ] = second;    // The value of "getSecond" IS reactive, it's a function that calls "f", gets the first element and calls that too
+ * const second = unwrapSignal(f);  // The value of `second` is reactive and CAN be destructured
+ * const [ getSecond ] = second;    // The value of `getSecond()` IS reactive, it's a function that calls `f()`, gets the first element and calls that too
  * ```
  * @param f An {@link Accessor} to a {@link Signal}
  */
