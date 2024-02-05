@@ -180,11 +180,11 @@ Functions that create bindings between `Signal`s
 > #### `toSignal()`
 > Creates a `Signal` from a property of an object
 > 
-> #### `coalesceSignal()`
-> Creates a non nullable `Signal` from a nullable one
-> 
 > #### `unwrapSignal()`
 > A `Signal`-specific version of `unwrap()` that allows the destructuring of its result
+> 
+> #### `coalesceSignal()`
+> Creates a non nullable `Signal` from a nullable one
 
 ### `ReactiveContext.create()`
 Method that creates a reactive version of a solid `Context` with some additional built-in functionalities

@@ -1,5 +1,5 @@
 
-import { Accessor, Setter, Signal, createRenderEffect, createRoot, on, onCleanup, untrack } from "solid-js";
+import { Accessor, Setter, Signal, createRenderEffect, createRoot, getListener, on, onCleanup, untrack } from "solid-js";
 import { unwrap } from "./unwrap";
 
 /** Conversion function that does nothing */
@@ -66,16 +66,6 @@ export function toSignal<T, K extends keyof T>(obj: Accessor<T>, k: Accessor<K>)
 }
 
 /**
- * Returns a {@link Signal} that applies the `??=` operator to the input one.
- * If the getter of {@link param0} is like `x`, then the result one is like "(x ??= {@link f}())"
- * @param param0 The {@link Signal} to which to coalesce the getter
- * @param f An {@link Accessor} to the value to use when there's a nullish value
- */
-export function coalesceSignal<T>([ get, set ]: Signal<T | undefined>, f: Accessor<T>): Signal<T> {
-    return [ () => get() ?? set(f), set as Setter<T> ];
-}
-
-/**
  * Calls {@link f} maintaining its reactivity at 2 levels.
  * Unlike the normal {@link unwrap}, this maintains reactivity on the elements of the array too, which means that it can be destructured
  * ```ts
@@ -89,4 +79,23 @@ export function coalesceSignal<T>([ get, set ]: Signal<T | undefined>, f: Access
  */
 export function unwrapSignal<T>(f: Accessor<Signal<T>>): Signal<T> {
     return [ () => f()[0](), (x?) => f()[1](x!) ];
+}
+
+/**
+ * Returns a {@link Signal} that applies the `??=` operator to the input one.
+ * If the getter of {@link param0} is like `x`, then the result one is like "(x ??= {@link f}())"
+ * @param param0 The {@link Signal} to which to coalesce the getter
+ * @param f An {@link Accessor} to the value to use when there's a nullish value
+ */
+export function coalesceSignal<T>([ get, set ]: Signal<T | undefined>, f: Accessor<T>): Signal<T> {
+    return [ getter, set as Setter<T> ];
+
+    /** Ensures that the current effect doesn't get executed twice because of the coalescing */
+    function getter() {
+        const out = get();
+        if (out != null) return out;
+        const listener = getListener()!, { state } = listener;
+        try { return set(f); } // This would cause the current effect to run again
+        finally { listener.state = state; }
+    }
 }
