@@ -5,6 +5,61 @@ It's always under hard development
 
 ## Components
 
+### `Enfold`
+Eventually wraps its content into a template if a certain condition is met.
+The following code
+```tsx
+const value = true;
+return <>
+  <Enfold when={value} template={c => <div style={{ background: "red" }}>{c()}</div>}>
+    CONTENT
+  </Enfold>
+</>
+```
+Is equivalent to this
+```tsx
+return <>
+  <div style={{ background: "red" }}>
+    CONTENT
+  </div>
+</>
+```
+And if `value` was falsish, it would have been equivalent to this
+```tsx
+return <>CONTENT</>
+```
+If you are wrapping the content with a context provider you need to set the `unrecycled` attribute to `true` to run again the whole content, otherwise the `Owner` of the content won't be child of the template one
+```tsx
+return <>
+  <Enfold unrecycled when={value} template={c => <ctx.Provider value={2} children={c()} />}>
+    {useContext(ctx)}
+  </Enfold>
+</>
+```
+
+### `Nest`
+Like a `For`, but instead of putting an element after another it nests them.
+The following code
+```tsx
+return <>
+  <Nest each={[ "red", "green", "blue" ]} template={(c, x) => <div style={{ background: x, padding: "1ch" }}>{c()}</div>}>
+    CONTENT
+  </Nest>
+</>
+```
+Is equivalent to this
+```tsx
+return <>
+  <div style={{ background: "red", padding: "1ch" }}>
+    <div style={{ background: "green", padding: "1ch" }}>
+      <div style={{ background: "blue", padding: "1ch" }}>
+        CONTENT
+      </div>
+    </div>
+  </div>
+</>
+```
+
 ### `Case` - `When`
 Allows you to not repeat the same condition across many `Match` components.
 The following code
@@ -34,59 +89,25 @@ return <>
 </>
 ```
 
-### `Enfold`
-Eventually wraps its content into a template if a certain condition is met.
-The following code
+### `Ensure`
+It works like a `Show`, but for `Switch`es, you can wrap `Match`es with it in order to not trigger them in certain conditions
 ```tsx
-const value = true;
+const value = false;
 return <>
-  <Enfold when={value} template={c => <div style={{ background: "red" }}>{c()}</div>}>
-    content
-  </Enfold>
-</>
-```
-Is equivalent to this
-```tsx
-return <>
-  <div style={{ background: "red" }}>
-    content
-  </div>
-</>
-```
-And if `value` was falsish, it would have been equivalent to this
-```tsx
-return <>content</>
-```
-If you are wrapping the content with a context provider you need to set the `unrecycled` attribute to `true` to run again the whole content, otherwise the `Owner` of the content won't be child of the template one
-```tsx
-return <>
-  <Enfold unrecycled when={value} template={c => <ctx.Provider value={2} children={c()} />}>
-    {useContext(ctx)}
-  </Enfold>
-</>
-```
-
-### `Nest`
-Like a `For`, but instead of putting an element after another it nests them.
-The following code
-```tsx
-return <>
-  <Nest each={[ "red", "green", "blue" ]} template={(c, x) => <div style={{ background: x, padding: "1ch" }}>{c()}</div>}>
-    content
-  </Nest>
-</>
-```
-Is equivalent to this
-```tsx
-return <>
-  <div style={{ background: "red", padding: "1ch" }}>
-    <div style={{ background: "green", padding: "1ch" }}>
-      <div style={{ background: "blue", padding: "1ch" }}>
-        content
-      </div>
-    </div>
-  </div>
-</>
+  <Switch>
+    <Match when={false}>
+      FALSE
+    </Match>
+    <Ensure when={false}>
+      <Match when>
+        This won't render because "value" is {false}
+      </Match>
+    </Ensure>
+    <Match when>
+      (This will render)
+    </Match>
+  </Switch>
+<>
 ```
 
 ### `createExtractor()`

@@ -1,10 +1,10 @@
 
 import { ReactiveContext } from "./helper/context";
 
-export * from "./component/case";
 export * from "./component/enfold";
 export * from "./component/extractor";
 export * from "./component/nest";
+export * from "./component/switch";
 export * from "./helper/bind";
 export * from "./helper/context";
 export * from "./helper/slot";

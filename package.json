@@ -1,6 +1,6 @@
 {
   "name": "solid-ctrl-flow",
-  "version": "1.0.44",
+  "version": "1.0.45",
   "description": "Control flow components for solid-js",
   "author": "AFatNiBBa",
   "license": "ISC",
@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.6.0",
+    "logic-types": "^1.3.2",
     "vite": "^4.4.9",
     "vite-plugin-dts": "^3.5.3",
     "vite-plugin-solid": "^2.7.0"

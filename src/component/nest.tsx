@@ -10,11 +10,11 @@ import { memoProps, untrackCall } from "../helper/util";
  * ```tsx
  * return <>
  * 	<Nest each={[ 1, 2, 3 ]} template={(c, x) => <>({x}, {c()}, -{x})</>}>
- * 		content
+ *		CONTENT
  * 	</Nest>
  * </>
  * ```
- * Will output "(1, (2, (3, content, -3), -2), -1)"
+ * Will output "(1, (2, (3, CONTENT, -3), -2), -1)"
  */
 export function Nest<T>(props: { each: readonly T[] | undefined, template: (c: Accessor<JSX.Element>, x: T, i: Accessor<number>) => JSX.Element, children: JSX.Element }) {
 	const memo = memoProps(props, [ "template", "children" ]);
