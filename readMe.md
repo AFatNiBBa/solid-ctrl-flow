@@ -60,18 +60,18 @@ return <>
 </>
 ```
 
-### `Case` - `When`
+### `On` - `Case`
 Allows you to not repeat the same condition across many `Match` components.
 The following code
 ```tsx
 const value = 1;
 return <>
   <Switch>
-    <Case value={value}>
-      <When value={1}>One</When>
-      <When value={2}>Two</When>
-      <When pred={(x) => `${x}`.length === 3}>Long</When>
-    </Case>
+    <On value={value}>
+      <Case value={1}>One</Case>
+      <Case value={2}>Two</Case>
+      <Case pred={x => `${x}`.length === 3}>Long</Case>
+    </On>
     <Match when>Default</Match>
   </Switch>
 </>
