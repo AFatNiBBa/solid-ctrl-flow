@@ -1,5 +1,5 @@
 
-import { Accessor, JSX, Show, createMemo } from "solid-js";
+import { Accessor, JSX, ParentProps, Show, createMemo } from "solid-js";
 import { untrackCall } from "../helper/util";
 import { unwrap } from "../helper/unwrap";
 
@@ -7,7 +7,7 @@ import { unwrap } from "../helper/unwrap";
 type Template<T> = (c: Accessor<JSX.Element>, x: T) => JSX.Element;
 
 /** Standard parameters to pass to an {@link Enfold} */
-type Standard<T> = { when: T, children: JSX.Element, unrecycled?: boolean };
+type Standard<T> = ParentProps<{ when: T, unrecycled?: boolean }>;
 
 /** Parameters to pass to a keyed {@link Enfold} */
 type Keyed<T> = Standard<T> & { keyed: true, template: Template<NonNullable<T>> };

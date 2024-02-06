@@ -1,5 +1,5 @@
 
-import { Accessor, For, JSX, createSignal, mapArray, onCleanup, onMount } from "solid-js";
+import { Accessor, For, JSX, ParentProps, createSignal, mapArray, onCleanup, onMount } from "solid-js";
 import { memoProps, untrackCall } from "../helper/util";
 
 /**
@@ -16,7 +16,7 @@ import { memoProps, untrackCall } from "../helper/util";
  * ```
  * Will output "(1, (2, (3, CONTENT, -3), -2), -1)"
  */
-export function Nest<T>(props: { each: readonly T[] | undefined, template: (c: Accessor<JSX.Element>, x: T, i: Accessor<number>) => JSX.Element, children: JSX.Element }) {
+export function Nest<T>(props: ParentProps<{ each: readonly T[] | undefined, template: (c: Accessor<JSX.Element>, x: T, i: Accessor<number>) => JSX.Element }>) {
 	const memo = memoProps(props, [ "template", "children" ]);
 	const content = mapArray(() => props.each, (x, i) => {
 		const [ get, set ] = createSignal<JSX.Element>();

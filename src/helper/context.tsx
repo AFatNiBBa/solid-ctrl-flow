@@ -1,5 +1,5 @@
 
-import { Accessor, Context, JSX, Owner, createContext, createMemo, createRoot, getOwner, useContext } from "solid-js";
+import { Accessor, Context, Owner, ParentProps, createContext, createMemo, createRoot, getOwner, useContext } from "solid-js";
 
 /** Type hack for making {@link ReactiveContext} implement {@link Accessor} */
 const BASE_CTOR = Function as unknown as new<T>() => Accessor<T>;
@@ -26,7 +26,7 @@ export abstract class ReactiveContext<T> extends BASE_CTOR<T> {
      */
     get Provider() {
         const { ctx } = this;
-        return function (props: { value?: T, children: JSX.Element }) {
+        return function (props: ParentProps<{ value?: T }>) {
             const memo = createMemo(() => props.value!);
             return <ctx.Provider value={memo} children={props.children} />
         }
@@ -38,9 +38,7 @@ export abstract class ReactiveContext<T> extends BASE_CTOR<T> {
      * @param f The function to run
      * @returns The same thing {@link f} returned
      */
-    runWith<V extends T, R>(value: V, f: (x: V) => R): R;
-    runWith<R>(value: T | undefined, f: (x: T) => R): R;
-    runWith<R>(value: T | undefined, f: (x: T) => R): R {
+    runWith<V extends T, R>(value: V | undefined, f: (x: V) => R): R {
         return runWithContext(this.ctx, value === undefined ? undefined : () => value, x => f(x()));
     }
 
@@ -69,14 +67,12 @@ export abstract class ReactiveContext<T> extends BASE_CTOR<T> {
  * @param f The function to run
  * @returns The same thing {@link f} returned
  */
-export function runWithContext<T, V extends T, R>(ctx: Context<T>, value: V, f: (x: V) => R): R;
-export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T) => R): R;
-export function runWithContext<T, R>(ctx: Context<T>, value: T | undefined, f: (x: T) => R) {
+export function runWithContext<T, V extends T, R>(ctx: Context<T>, value: V | undefined, f: (x: V) => R) {
 	return createRoot(d => {
         try
         {
             (getOwner()!.context ??= {})[ctx.id] = value;
-            return f(value === undefined ? ctx.defaultValue : value);
+            return f(value === undefined ? ctx.defaultValue as V : value);
         }
         finally { d(); }
     });

@@ -5,6 +5,17 @@ It's always under hard development
 
 ## Components
 
+### `SameContext`
+Makes its children inherit the `Context`s of the provided `Owner`
+```tsx
+const owner = ...;
+return <>
+  <SameContext owner={owner}>
+    ...
+  </SameContext>
+</>
+```
+
 ### `Enfold`
 Eventually wraps its content into a template if a certain condition is met.
 The following code
@@ -89,27 +100,6 @@ return <>
 </>
 ```
 
-### `Ensure`
-It works like a `Show`, but for `Switch`es, you can wrap `Match`es with it in order to not trigger them in certain conditions
-```tsx
-const value = false;
-return <>
-  <Switch>
-    <Match when={false}>
-      FALSE
-    </Match>
-    <Ensure when={false}>
-      <Match when>
-        This won't render because "value" is {false}
-      </Match>
-    </Ensure>
-    <Match when>
-      (This will render)
-    </Match>
-  </Switch>
-<>
-```
-
 ### `createExtractor()`
 Creates a context for components that may need to be out of their parent in certain conditions.
 If you have this component
@@ -182,6 +172,14 @@ Notice that you can use a `Source` component without adding it to the DOM:
   Something
 </myCustomExtractor.Source>
 return <>Something else</>
+```
+When something gets moved from a `Source` to a `Dest`, it will inherit contexts from its destination, UNLESS you use the `sameContext` attribute
+```tsx
+return <>
+  <myCustomExtractor.Source sameContext>
+    ...
+  </myCustomExtractor.Source>
+</>
 ```
 
 ## Utility
