@@ -1,5 +1,39 @@
 
-import { EffectFunction, MemoOptions, Resource, createEffect, createMemo, createResource, on, splitProps, untrack } from "solid-js";
+import { Accessor, EffectFunction, JSX, MemoOptions, Resource, createEffect, createMemo, createResource, on, splitProps, untrack } from "solid-js";
+
+/**
+ * Utility function that makes you use an {@link Accessor} of a {@link JSX.Element} as a {@link JSX.Element} itself.
+ * Used to defer the execution of {@link f} until it gets rendered.
+ * Using {@link Function}s as {@link JSX.Element} is supported by default but is forbidden by the types
+ * @param f The {@link Accessor} to the actual content
+ */
+export const deferCall = (f: Accessor<JSX.Element>) => f as unknown as JSX.Element;
+
+/**
+ * Executes {@link f} untracking it.
+ * Due to the fact that the function is passed as input, it does not untrack its changes (It's intentional)
+ * @param this The same thing that {@link f} wants as `this`
+ * @param f The function to call
+ * @param args Arguments for calling {@link f}
+ * @returns The same thing {@link f} returned
+ */
+export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
+   return untrack(() => f.apply(this, args) as ReturnType<F>);
+}
+
+/**
+ * Creates a {@link Resource} from the function {@link f}.
+ * The resource will be refetched each time one of the dependencies of {@link f} changes.
+ * The only dependant signals that will be tracked are the ones before the first `await`
+ * @param f A reactive resource fetcher
+ */
+export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
+   var refetch: () => void;
+   const memo = createMemo(f);
+   createEffect(on(memo, () => refetch?.()));
+   const [ get ] = [ , { refetch } ] = createResource(memo);
+   return get as Resource<Awaited<R>>;
+}
 
 //#region PROPS
 
@@ -36,29 +70,3 @@ export function splitAndMemoProps<T extends Record<any, any>, K extends readonly
 }
 
 //#endregion
-
-/**
- * Creates a {@link Resource} from the function {@link f}.
- * The resource will be refetched each time one of the dependencies of {@link f} changes.
- * The only dependant signals that will be tracked are the ones before the first `await`
- * @param f A reactive resource fetcher
- */
-export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
-    var refetch: () => void;
-    const memo = createMemo(f);
-    createEffect(on(memo, () => refetch?.()));
-    const [ get ] = [ , { refetch } ] = createResource(memo);
-    return get as Resource<Awaited<R>>;
-}
-
-/**
- * Executes {@link f} untracking it.
- * Due to the fact that the function is passed as input, it does not untrack its changes (It's intentional)
- * @param this The same thing that {@link f} wants as `this`
- * @param f The function to call
- * @param args Arguments for calling {@link f}
- * @returns The same thing {@link f} returned
- */
-export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
-    return untrack(() => f.apply(this, args) as ReturnType<F>);
-}
