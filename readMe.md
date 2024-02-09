@@ -234,9 +234,6 @@ return <>
 </>
 ```
 
-### `deferCall()`
-Utility function that makes you use an `Accessor` of a `JSX.Element` as a `JSX.Element` itself
-
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument
 

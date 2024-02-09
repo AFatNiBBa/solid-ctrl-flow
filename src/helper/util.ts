@@ -1,13 +1,5 @@
 
-import { Accessor, EffectFunction, JSX, MemoOptions, Resource, createEffect, createMemo, createResource, on, splitProps, untrack } from "solid-js";
-
-/**
- * Utility function that makes you use an {@link Accessor} of a {@link JSX.Element} as a {@link JSX.Element} itself.
- * Used to defer the execution of {@link f} until it gets rendered.
- * Using {@link Function}s as {@link JSX.Element} is supported by default but is forbidden by the types
- * @param f The {@link Accessor} to the actual content
- */
-export const deferCall = (f: Accessor<JSX.Element>) => f as unknown as JSX.Element;
+import { EffectFunction, MemoOptions, Resource, createEffect, createMemo, createResource, on, splitProps, untrack } from "solid-js";
 
 /**
  * Executes {@link f} untracking it.

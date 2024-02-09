@@ -1,6 +1,6 @@
 
 import { Accessor, For, JSX, ParentProps, createSignal, mapArray, onCleanup, onMount } from "solid-js";
-import { deferCall, memoProps, untrackCall } from "../helper/util";
+import { memoProps, untrackCall } from "../helper/util";
 
 /**
  * Like a {@link For}, but instead of putting an element after another it nests them.
@@ -20,7 +20,7 @@ export function Nest<T>(props: ParentProps<{ each: readonly T[] | undefined, tem
 	const memo = memoProps(props, [ "template", "children" ]);
 	const content = mapArray(() => props.each, (x, i) => {
 		const [ get, set ] = createSignal<JSX.Element>();
-		const out = <>{untrackCall(memo.template, deferCall(get), x, i)}</>;
+		const out = <>{untrackCall(memo.template, <>{get()}</>, x, i)}</>;
 		return (x: JSX.Element) => {
 			onMount(() => set(() => x)); // It doesn't get executed immediately because it needs to wait for the effect that will remove the previous element to run
 			onCleanup(() => set(undefined));

@@ -1,6 +1,6 @@
 
 import { Accessor, JSX, ParentProps, Show, createMemo } from "solid-js";
-import { deferCall, untrackCall } from "../helper/util";
+import { untrackCall } from "../helper/util";
 import { unwrap } from "../helper/unwrap";
 
 /** Type of an element wrapping call-back which accepts an additional parameter */
@@ -30,7 +30,7 @@ export function Enfold<T>(props: Keyed<T> | Unkeyed<T>) {
     const children = unwrap(createMemo(() => props.unrecycled ? f : createMemo(f)));
     return <>
         <Show keyed={props.keyed as any} when={props.when} fallback={children()}>
-            {x => <>{untrackCall(props.template, deferCall(children), x)}</>}
+            {x => <>{untrackCall(props.template, <>{children()}</>, x)}</>}
         </Show>
     </>
 }
