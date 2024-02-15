@@ -4,7 +4,7 @@ import { untrackCall } from "../helper/util";
 import { unwrap } from "../helper/unwrap";
 
 /** Type of an element wrapping call-back which accepts an additional parameter */
-type Template<T> = (c: JSX.Element, x: T) => JSX.Element;
+type Template<T> = (c: Accessor<JSX.Element>, x: T) => JSX.Element;
 
 /** Standard parameters to pass to an {@link Enfold} */
 type Standard<T> = ParentProps<{ when: T, unrecycled?: boolean }>;
@@ -30,7 +30,7 @@ export function Enfold<T>(props: Keyed<T> | Unkeyed<T>) {
     const children = unwrap(createMemo(() => props.unrecycled ? f : createMemo(f)));
     return <>
         <Show keyed={props.keyed as any} when={props.when} fallback={children()}>
-            {x => <>{untrackCall(props.template, <>{children()}</>, x)}</>}
+            {x => <>{untrackCall(props.template, children, x)}</>}
         </Show>
     </>
 }

@@ -9,18 +9,18 @@ import { memoProps, untrackCall } from "../helper/util";
  * Example:
  * ```tsx
  * return <>
- * 	<Nest each={[ 1, 2, 3 ]} template={(c, x) => <>({x}, {c}, -{x})</>}>
+ * 	<Nest each={[ 1, 2, 3 ]} template={(c, x) => <>({x}, {c()}, -{x})</>}>
  *		CONTENT
  * 	</Nest>
  * </>
  * ```
  * Will output "(1, (2, (3, CONTENT, -3), -2), -1)"
  */
-export function Nest<T>(props: ParentProps<{ each: readonly T[] | undefined, template: (c: JSX.Element, x: T, i: Accessor<number>) => JSX.Element }>) {
+export function Nest<T>(props: ParentProps<{ each: readonly T[] | undefined, template: (c: Accessor<JSX.Element>, x: T, i: Accessor<number>) => JSX.Element }>) {
 	const memo = memoProps(props, [ "template", "children" ]);
 	const content = mapArray(() => props.each, (x, i) => {
 		const [ get, set ] = createSignal<JSX.Element>();
-		const out = <>{untrackCall(memo.template, <>{get()}</>, x, i)}</>;
+		const out = <>{untrackCall(memo.template, get, x, i)}</>;
 		return (x: JSX.Element) => {
 			onMount(() => set(() => x)); // It doesn't get executed immediately because it needs to wait for the effect that will remove the previous element to run
 			onCleanup(() => set(undefined));

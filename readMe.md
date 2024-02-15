@@ -22,7 +22,7 @@ The following code
 ```tsx
 const value = true;
 return <>
-  <Enfold when={value} template={c => <div style={{ background: "red" }}>{c}</div>}>
+  <Enfold when={value} template={c => <div style={{ background: "red" }}>{c()}</div>}>
     CONTENT
   </Enfold>
 </>
@@ -42,7 +42,7 @@ return <>CONTENT</>
 If you are wrapping the content with a context provider you need to set the `unrecycled` attribute to `true` to run again the whole content, otherwise the `Owner` of the content won't be child of the template one
 ```tsx
 return <>
-  <Enfold unrecycled when={value} template={c => <ctx.Provider value={2} children={c} />}>
+  <Enfold unrecycled when={value} template={c => <ctx.Provider value={2} children={c()} />}>
     {useContext(ctx)}
   </Enfold>
 </>
@@ -53,7 +53,7 @@ Like a `For`, but instead of putting an element after another it nests them.
 The following code
 ```tsx
 return <>
-  <Nest each={[ "red", "green", "blue" ]} template={(c, x) => <div style={{ background: x, padding: "1ch" }}>{c}</div>}>
+  <Nest each={[ "red", "green", "blue" ]} template={(c, x) => <div style={{ background: x, padding: "1ch" }}>{c()}</div>}>
     CONTENT
   </Nest>
 </>

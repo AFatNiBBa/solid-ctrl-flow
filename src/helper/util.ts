@@ -10,7 +10,7 @@ import { EffectFunction, MemoOptions, Resource, createEffect, createMemo, create
  * @returns The same thing {@link f} returned
  */
 export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
-   return untrack(() => f.apply(this, args) as ReturnType<F>);
+    return untrack(() => f.apply(this, args) as ReturnType<F>);
 }
 
 /**
@@ -20,11 +20,11 @@ export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisPar
  * @param f A reactive resource fetcher
  */
 export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
-   var refetch: () => void;
-   const memo = createMemo(f);
-   createEffect(on(memo, () => refetch?.()));
-   const [ get ] = [ , { refetch } ] = createResource(memo);
-   return get as Resource<Awaited<R>>;
+    var refetch: () => void;
+    const memo = createMemo(f);
+    createEffect(on(memo, () => refetch?.()));
+    const [ get ] = [ , { refetch } ] = createResource(memo);
+    return get as Resource<Awaited<R>>;
 }
 
 //#region PROPS
