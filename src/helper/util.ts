@@ -50,7 +50,8 @@ export function memoProps(obj: any, keys: PropertyKey[] = Object.keys(obj), equa
 }
 
 /**
- * Executes {@link splitProps} and memoizes the first of the two returned objects using {@link memoProps}
+ * Executes {@link splitProps} and memoizes the first of the two returned objects using {@link memoProps}.
+ * Unlike {@link splitProps}, this doesn't support multiple key-sets out of the box
  * @param obj Object to split and partially memoize
  * @param keys The keys of the properties to memoize and to include in the first of the two objects
  * @param equals The comparator function to use on the newly created memos
