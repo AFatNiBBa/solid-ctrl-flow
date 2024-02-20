@@ -39,35 +39,13 @@ And if `value` was falsish, it would have been equivalent to this
 ```tsx
 return <>CONTENT</>
 ```
-If you are wrapping the content with a context provider you need to set the `unrecycled` attribute to `true` to run again the whole content, otherwise the `Owner` of the content won't be child of the template one
+If you are NOT wrapping the content with a context provider you can set the `recycled` attribute to `true` in order to NOT run again the whole content each time its template gets added/removed, in this case the `Owner` of the content won't be child of the template one
 ```tsx
 return <>
-  <Enfold unrecycled when={value} template={c => <ctx.Provider value={2} children={c()} />}>
+  <Enfold recycled when={value} template={c => <ctx.Provider value={2} children={c()} />}>
+    {/* This won't work */}
     {useContext(ctx)}
   </Enfold>
-</>
-```
-
-### `Nest`
-Like a `For`, but instead of putting an element after another it nests them.
-The following code
-```tsx
-return <>
-  <Nest each={[ "red", "green", "blue" ]} template={(c, x) => <div style={{ background: x, padding: "1ch" }}>{c()}</div>}>
-    CONTENT
-  </Nest>
-</>
-```
-Is equivalent to this
-```tsx
-return <>
-  <div style={{ background: "red", padding: "1ch" }}>
-    <div style={{ background: "green", padding: "1ch" }}>
-      <div style={{ background: "blue", padding: "1ch" }}>
-        CONTENT
-      </div>
-    </div>
-  </div>
 </>
 ```
 
@@ -210,7 +188,7 @@ Method that creates a reactive version of a solid `Context` with some additional
 ```ts
 const ctx = ReactiveContext.create("SOMETHING");
 const underlyingNormalContext = ctx.ctx;
-const valueAccessorForTheCurrentOwner = ctx.read;
+const valueAccessorForTheCurrentOwner = ctx.get;
 const value = ctx();
 ```
 

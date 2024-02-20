@@ -6,7 +6,7 @@ const BASE_CTOR = Function as unknown as new<T>() => Accessor<T>;
 
 /**
  * Reactive {@link Context} with some additional built-in functionalities.
- * The call signature returns the value in the current {@link Owner} (It's like calling {@link read})
+ * The call signature returns the value in the current {@link Owner} (It's like calling {@link get})
  */
 export abstract class ReactiveContext<T> extends BASE_CTOR<T> {
     /** The actual {@link Context} that contains the reactive {@link Accessor} to the value */
@@ -16,7 +16,7 @@ export abstract class ReactiveContext<T> extends BASE_CTOR<T> {
      * Returns the {@link Accessor} for the value in the current {@link Owner}.
      * It's like calling {@link useContext}
      */
-    get read() { return useContext(this.ctx); }
+    get get() { return useContext(this.ctx); }
 
     /**
      * Component that sets the value of the current {@link Context} for its children.
@@ -51,7 +51,7 @@ export abstract class ReactiveContext<T> extends BASE_CTOR<T> {
     static create<T>(defaultValue: T, name?: string): ReactiveContext<T>;
     static create<T>(defaultValue: T, name?: string) {
         const ctx = createContext(() => defaultValue, { name });
-        const f = () => out.read();
+        const f = () => out.get();
         f.ctx = ctx;
         const out = Object.setPrototypeOf(f, ReactiveContext.prototype) as ReactiveContext<T>;
         return out;

@@ -50,7 +50,7 @@ export function Case<T>(props: { pred: (x: any) => T, keyed: true, children: (x:
 
 export function Case<T>(props: { value?: unknown, pred?: (x: any) => T }) {
     const [ mine, other ] = splitAndMemoProps(props, [ "value", "pred" ]);
-    const { read } = ctx;
+    const { get } = ctx;
     const pred = (x: unknown) => mine.pred ? mine.pred(x) : x === mine.value;
-    return <Match when={pred(read())} {...other as any} />
+    return <Match when={pred(get())} {...other as any} />
 }
