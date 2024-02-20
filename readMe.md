@@ -43,7 +43,7 @@ If you are NOT wrapping the content with a context provider you can set the `rec
 ```tsx
 return <>
   <Enfold recycled when={value} template={c => <ctx.Provider value={2} children={c()} />}>
-    {/* This won't work */}
+    {/* This won't be 2 */}
     {useContext(ctx)}
   </Enfold>
 </>
