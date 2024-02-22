@@ -42,13 +42,13 @@ export const On: (props: ParentProps<{ value: any }>) => JSX.Element = ctx.Provi
 /** Like a {@link Match} but gets the value from the closest {@link On} ancestor */
 export function Case(props: ParentProps<{ value: unknown }>): JSX.Element;
 
-export function Case(props: ParentProps<{ pred: (x: any) => unknown }>): JSX.Element;
+export function Case(props: ParentProps<{ pred(x: any): unknown }>): JSX.Element;
 
-export function Case<T>(props: { pred: (x: any) => T, keyed?: false, children: (x: Accessor<NonNullable<T>>) => JSX.Element }): JSX.Element;
+export function Case<T>(props: { pred(x: any): T, keyed?: false, children(x: Accessor<NonNullable<T>>): JSX.Element }): JSX.Element;
 
-export function Case<T>(props: { pred: (x: any) => T, keyed: true, children: (x: NonNullable<T>) => JSX.Element }): JSX.Element;
+export function Case<T>(props: { pred(x: any): T, keyed: true, children(x: NonNullable<T>): JSX.Element }): JSX.Element;
 
-export function Case<T>(props: { value?: unknown, pred?: (x: any) => T }) {
+export function Case<T>(props: { value?: unknown, pred?(x: any): T }) {
     const [ mine, other ] = splitAndMemoProps(props, [ "value", "pred" ]);
     const { get } = ctx;
     const pred = (x: unknown) => mine.pred ? mine.pred(x) : x === mine.value;
