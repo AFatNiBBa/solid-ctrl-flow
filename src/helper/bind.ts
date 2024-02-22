@@ -1,5 +1,5 @@
 
-import { Accessor, Setter, Signal, createRenderEffect, createRoot, getListener, on, onCleanup, untrack } from "solid-js";
+import { Accessor, Setter, Signal, createRenderEffect, createRoot, createSignal, getListener, on, onCleanup, untrack } from "solid-js";
 import { unwrap } from "./unwrap";
 
 /** Conversion function that does nothing */
@@ -79,6 +79,22 @@ export function toSignal<T, K extends keyof T>(obj: Accessor<T>, k: Accessor<K>)
  */
 export function unwrapSignal<T>(f: Accessor<Signal<T>>): Signal<T> {
     return [ () => f()[0](), (x?) => f()[1](x!) ];
+}
+
+/**
+ * Creates a {@link Signal} that behaves like the input one, with the only difference that each call to the setter will trigger the effects even if the value didn't change.
+ * Can give reactivity to a fake {@link Signal}
+ * @param param0 The {@link Signal} to force
+ */
+export function forceSignal<T>([ get, set ]: Signal<T>): Signal<T> {
+    const [ track, update ] = createSignal(undefined, { equals: false });
+    return [
+        () => (track(), get()),
+        (x?) => {
+            const out = set(x!);
+            return update(), out;
+        }
+    ]
 }
 
 /**

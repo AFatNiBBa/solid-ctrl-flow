@@ -179,6 +179,9 @@ Functions that create bindings between `Signal`s
 > 
 > #### `unwrapSignal()`
 > A `Signal`-specific version of `unwrap()` that allows the destructuring of its result
+>
+> #### `forceSignal()`
+> Creates a `Signal` that behaves like the input one, with the only difference that each call to the setter will trigger the effects even if the value didn't change
 > 
 > #### `coalesceSignal()`
 > Creates a non nullable `Signal` from a nullable one
