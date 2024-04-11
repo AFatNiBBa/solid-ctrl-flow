@@ -182,9 +182,6 @@ Functions that create bindings between `Signal`s
 >
 > #### `forceSignal()`
 > Creates a `Signal` that behaves like the input one, with the only difference that each call to the setter will trigger the effects even if the value didn't change
-> 
-> #### `coalesceSignal()`
-> Creates a non nullable `Signal` from a nullable one
 
 ### `ReactiveContext.create()`
 Method that creates a reactive version of a solid `Context` with some additional built-in functionalities

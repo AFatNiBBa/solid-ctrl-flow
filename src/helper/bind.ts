@@ -1,5 +1,5 @@
 
-import { Accessor, Setter, Signal, createRenderEffect, createRoot, createSignal, getListener, on, onCleanup, untrack } from "solid-js";
+import { Accessor, Setter, Signal, createComputed, createRoot, createSignal, on, onCleanup, untrack } from "solid-js";
 import { unwrap } from "./unwrap";
 
 /** Conversion function that does nothing */
@@ -10,10 +10,9 @@ export type Convert<S, D> = (x: S, prev: D) => D;
 
 /**
  * Creates a one-way binding between two {@link Signal}s.
- * The function uses {@link createRenderEffect}, which means that:
+ * The function uses {@link createComputed}, which means that:
  * - As soon as the function is done executing the two {@link Signal}s will have the same value
- * - If {@link source} changes, {@link dest} wont be instantly updated
- * - If the current owner gets disposed before {@link dest} is updated, it never will
+ * - If {@link source} changes, {@link dest} will be instantly updated
  * @param source The getter of the source of the binding
  * @param dest The setter of the destination of the binding
  * @param to Conversion function from {@link S} to {@link D}
@@ -23,7 +22,7 @@ export type Convert<S, D> = (x: S, prev: D) => D;
 export function bind<S>(source: Accessor<S>, dest: Setter<S>, to?: undefined, skip?: boolean): () => void;
 export function bind<S, D>(source: Accessor<S>, dest: Setter<D>, to: Convert<S, D>, skip?: boolean): () => void;
 export function bind<S, D>(source: Accessor<S>, dest: Setter<D>, to: Convert<S, D> = IDENTITY, skip = false) {
-    const d = createRoot(d => (createRenderEffect(on(source, x => skip ? skip = false : dest(prev => to(x, prev)))), d));
+    const d = createRoot(d => (createComputed(on(source, x => skip ? skip = false : dest(prev => to(x, prev)))), d));
     return onCleanup(d), d;
 }
 
@@ -94,24 +93,5 @@ export function forceSignal<T>([ get, set ]: Signal<T>): Signal<T> {
             const out = set(x!);
             return update(), out;
         }
-    ]
-}
-
-/**
- * Returns a {@link Signal} that applies the `??=` operator to the input one.
- * If the getter of {@link param0} is like `x`, then the result one is like "(x ??= {@link f}())"
- * @param param0 The {@link Signal} to which to coalesce the getter
- * @param f An {@link Accessor} to the value to use when there's a nullish value
- */
-export function coalesceSignal<T>([ get, set ]: Signal<T | undefined>, f: Accessor<T>): Signal<T> {
-    return [ getter, set as Setter<T> ];
-
-    /** Ensures that the current effect doesn't get executed twice because of the coalescing */
-    function getter() {
-        const out = get();
-        if (out != null) return out;
-        const listener = getListener()!, { state } = listener;
-        try { return set(f); } // This would cause the current effect to run again
-        finally { listener.state = state; }
-    }
+    ];
 }
