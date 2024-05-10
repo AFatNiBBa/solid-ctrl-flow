@@ -1,5 +1,5 @@
 
-import { EffectFunction, MemoOptions, Resource, createEffect, createMemo, createResource, on, splitProps, untrack } from "solid-js";
+import { MemoOptions, createMemo, splitProps, untrack } from "solid-js";
 
 /**
  * Executes {@link f} untracking it.
@@ -11,20 +11,6 @@ import { EffectFunction, MemoOptions, Resource, createEffect, createMemo, create
  */
 export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
     return untrack(() => f.apply(this, args) as ReturnType<F>);
-}
-
-/**
- * Creates a {@link Resource} from the function {@link f}.
- * The resource will be refetched each time one of the dependencies of {@link f} changes.
- * The only dependant signals that will be tracked are the ones before the first `await`
- * @param f A reactive resource fetcher
- */
-export function createReactiveResource<R>(f: EffectFunction<R | undefined, R>) {
-    var refetch: () => void;
-    const memo = createMemo(f);
-    createEffect(on(memo, () => refetch?.()));
-    const [ get ] = [ , { refetch } ] = createResource(memo);
-    return get as Resource<Awaited<R>>;
 }
 
 //#region PROPS

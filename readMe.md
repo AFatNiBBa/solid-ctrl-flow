@@ -215,9 +215,6 @@ return <>
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument
 
-### `createReactiveResource()`
-Like `createResource()` but the provided function will be reactive
-
 ### `memoProps()`
 Creates a partial version of an object with memoized remaining properties
 
