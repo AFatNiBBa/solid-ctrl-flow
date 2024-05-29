@@ -5,7 +5,7 @@ import { ReactiveContext } from "./helper/context";
 export * from "./component/enfold";
 export * from "./component/extractor";
 export * from "./component/switch";
-export * from "./helper/bind";
+export * from "./helper/atom";
 export * from "./helper/context";
 export * from "./helper/slot";
 export * from "./helper/unwrap";

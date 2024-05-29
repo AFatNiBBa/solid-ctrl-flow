@@ -21,7 +21,7 @@ export abstract class ReactiveContext<T> extends BASE_CTOR<T> {
     /**
      * Component that sets the value of the current {@link Context} for its children.
      * If no value is provided then it will use the default value for {@link ctx}.
-     * The function is binded for the way solid compiles components inside other objects.
+     * The function is bound for the way solid compiles components inside other objects.
      * (The value is memoized)
      */
     get Provider() {
