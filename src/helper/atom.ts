@@ -18,6 +18,15 @@ export class Atom<T> {
 		return this.value = f(untrack(this.get));
 	}
 
+	/**
+     * Creates a new {@link Atom} that applies a conversion to the current one
+     * @param to Conversion function from {@link S} to {@link D}
+     * @param from Conversion function from {@link D} to {@link S}
+     */
+	convert<R>(to: (x: T) => R, from: (x: R) => T) {
+		return new Atom(() => to(this.value), x => this.value = from(x));
+	}
+
     /**
      * Creates an {@link Atom} that forwards an {@link Accessor} to another {@link Atom}
      * @param f The reactive {@link Accessor} to the {@link Atom} to forward
@@ -32,16 +41,6 @@ export class Atom<T> {
      */
 	static from<T>([ get, set ]: Signal<T>) {
 		return new this(get, v => set(() => v));
-	}
-
-	/**
-     * Creates a new {@link Atom} that applies a conversion to another {@link Atom}
-     * @param atom The {@link Atom} to which to apply the conversion
-     * @param to Conversion function from {@link S} to {@link D}
-     * @param from Conversion function from {@link D} to {@link S}
-     */
-	static convert<S, D>(atom: Atom<S>, to: (x: S) => D, from: (x: D) => S) {
-		return new this(() => to(atom.value), x => atom.value = from(x));
 	}
 
 	/**

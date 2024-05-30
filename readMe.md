@@ -171,14 +171,14 @@ Customizable and simplified wrappers for reactive states
 > #### `Atom.update()`
 > Like the `Setter` overload of a `Signal` that takes a function with the previous value
 > 
+> #### `Atom.convert()`
+> Creates a new `Atom` that applies a conversion to the current one
+> 
 > #### `Atom.unwrap()`
 > An `Atom`-specific (optimized) version of `unwrap()` that allows the destructuring of its result
 > 
 > #### `Atom.from()`
 > Creates an `Atom` from a `Signal`
-> 
-> #### `Atom.convert()`
-> Creates a new `Atom` that applies a conversion to another `Atom`
 >
 > #### `Atom.source()`
 > Similiar to `Atom.unwrap()`, but if the `Accessor` doesn't return anything it automatically creates an internal `Signal` in which to store the value
