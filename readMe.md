@@ -178,7 +178,10 @@ Customizable and simplified wrappers for reactive states
 > An `Atom`-specific (optimized) version of `unwrap()` that allows the destructuring of its result
 > 
 > #### `Atom.from()`
-> Creates an `Atom` from a `Signal`
+> Creates an `Atom` based on a `Signal`
+>
+> #### `Atom.prop()`
+> Creates an `Atom` based on an object property
 >
 > #### `Atom.source()`
 > Similiar to `Atom.unwrap()`, but if the `Accessor` doesn't return anything it automatically creates an internal `Signal` in which to store the value
@@ -214,6 +217,9 @@ return <>
 
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument
+
+### `nameOf()`
+Utility function that powers `Atom.prop()`
 
 ### `memoProps()`
 Creates a partial version of an object with memoized remaining properties

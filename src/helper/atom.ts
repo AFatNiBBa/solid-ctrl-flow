@@ -1,5 +1,6 @@
 
 import { Accessor, Setter, Signal, createMemo, createSignal, on, untrack } from "solid-js";
+import { NamesOf, nameOf } from "./util";
 
 /** Reactive atomic value without the inconveniences of {@link Signal} */
 export class Atom<T> {
@@ -24,7 +25,7 @@ export class Atom<T> {
      * @param from Conversion function from {@link D} to {@link S}
      */
 	convert<R>(to: (x: T) => R, from: (x: R) => T) {
-		return new Atom(() => to(this.value), x => this.value = from(x));
+		return new Atom(() => to(this.value), v => this.value = from(v));
 	}
 
     /**
@@ -32,7 +33,7 @@ export class Atom<T> {
      * @param f The reactive {@link Accessor} to the {@link Atom} to forward
      */
 	static unwrap<T>(f: Accessor<Atom<T>>) {
-		return new this(() => f().value, x => f().value = x);
+		return new this(() => f().value, v => f().value = v);
 	}
 
     /**
@@ -41,6 +42,17 @@ export class Atom<T> {
      */
 	static from<T>([ get, set ]: Signal<T>) {
 		return new this(get, v => set(() => v));
+	}
+
+	/**
+	 * Creates an {@link Atom} based on an object property.
+	 * The result of {@link k} will be memoized, while {@link obj}'s one won't
+	 * @param obj The object containing the property
+	 * @param k A function that returns the key of the property and will be passed to {@link nameOf}
+	 */
+	static prop<T, K extends keyof T>(obj: Accessor<T>, k: (x: NamesOf<T>) => K) {
+		const temp = createMemo(() => nameOf<T, K>(k));
+		return new this(() => obj()[temp()], v => obj()[temp()] = v);
 	}
 
 	/**
