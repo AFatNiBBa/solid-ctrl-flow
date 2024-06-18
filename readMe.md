@@ -162,30 +162,6 @@ return <>
 
 ## Utility
 
-### `Atom`s
-Customizable and simplified wrappers for reactive states
-
-> #### `new Atom()`
-> Creates an `Atom` with custom getter and setter
-> 
-> #### `Atom.update()`
-> Like the `Setter` overload of a `Signal` that takes a function with the previous value
-> 
-> #### `Atom.convert()`
-> Creates a new `Atom` that applies a conversion to the current one
-> 
-> #### `Atom.unwrap()`
-> An `Atom`-specific (optimized) version of `unwrap()` that allows the destructuring of its result
-> 
-> #### `Atom.from()`
-> Creates an `Atom` based on a `Signal`
->
-> #### `Atom.prop()`
-> Creates an `Atom` based on an object property
->
-> #### `Atom.source()`
-> Similiar to `Atom.unwrap()`, but if the `Accessor` doesn't return anything it automatically creates an internal `Signal` in which to store the value
-
 ### `ReactiveContext.create()`
 Method that creates a reactive version of a solid `Context` with some additional built-in functionalities
 ```ts
@@ -217,9 +193,6 @@ return <>
 
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument
-
-### `nameOf()`
-Utility function that powers `Atom.prop()`
 
 ### `memoProps()`
 Creates a partial version of an object with memoized remaining properties
