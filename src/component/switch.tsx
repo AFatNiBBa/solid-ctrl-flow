@@ -1,10 +1,9 @@
 
-import { Switch, Match, JSX, Accessor, ParentProps } from "solid-js";
-import { ReactiveContext } from "../helper/context";
+import { Switch, Match, JSX, Accessor, ParentProps, createContext, useContext } from "solid-js";
 import { splitAndMemoProps } from "../index";
 
 /** Context for the {@link On} and {@link Case} components */
-const ctx = ReactiveContext.create(undefined, "on-case");
+const ctx = createContext<Accessor<any>>(undefined, { name: "on-case" });
 
 /**
  * Allows the use of {@link Case}s inside of {@link Switch}es.
@@ -36,7 +35,7 @@ const ctx = ReactiveContext.create(undefined, "on-case");
  * <>
  * ```
  */
-export const On: (props: ParentProps<{ value: any }>) => JSX.Element = ctx.Provider;
+export const On = (props: ParentProps<{ value: any }>) => <ctx.Provider value={() => props.value}>{props.children}</ctx.Provider>
 
 /** Like a {@link Match} but gets the value from the closest {@link On} ancestor */
 export function Case(props: ParentProps<{ value: unknown }>): JSX.Element;
@@ -49,7 +48,7 @@ export function Case<T>(props: { pred(x: any): T, keyed: true, children(x: NonNu
 
 export function Case<T>(props: { value?: unknown, pred?(x: any): T }) {
     const [ mine, other ] = splitAndMemoProps(props, [ "value", "pred" ]);
-    const { get } = ctx;
+    const get = useContext(ctx)!;
     const pred = (x: unknown) => mine.pred ? mine.pred(x) : x === mine.value;
     return <Match when={pred(get())} {...other as any} />
 }

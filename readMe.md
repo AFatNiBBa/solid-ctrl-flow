@@ -162,40 +162,17 @@ return <>
 
 ## Utility
 
-### `ReactiveContext.create()`
-Method that creates a reactive version of a solid `Context` with some additional built-in functionalities
-```ts
-const ctx = ReactiveContext.create("SOMETHING");
-const underlyingNormalContext = ctx.ctx;
-const valueAccessorForTheCurrentOwner = ctx.get;
-const value = ctx();
-```
-
-### `runWithContext()`
-Creates a context scope that persists for the duration of a function
-
 ### `unwrap()`
 Calls an `Accessor` maintaining its reactivity at 1 level
-
-### `debug()`
-Allows you to define ui section that are only visible in debug or NOT in debug
-```tsx
-const value = false;
-return <>
-  <debug.Provider value={value}>
-    {/* (A LOT OF NESTING...) */}
-    <Show when={debug()}>
-      THIS WOULD BE VISIBLE IF "value" HAD BEEN {true}
-    </Show>
-  </debug.Provider>
-</>
-```
-
-### `untrackCall()`
-Calls a function untracking what happens inside of it but not what gets passed as its argument
 
 ### `memoProps()`
 Creates a partial version of an object with memoized remaining properties
 
 ### `splitAndMemoProps()`
 Like `splitProps()` but memoizes the whole local part
+
+### `untrackCall()`
+Calls a function untracking what happens inside of it but not what gets passed as its argument
+
+### `runWithContext()`
+Creates a context scope that persists for the duration of a function
