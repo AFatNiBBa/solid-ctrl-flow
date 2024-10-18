@@ -6,7 +6,7 @@ type Equals = MemoOptions<unknown>["equals"];
 
 /**
  * Memoizes some of the properties of {@link obj}.
- * If {@link keys} is not provided, memoizes everything that get returned by {@link Object.keys} when provided with {@link obj}.
+ * If {@link keys} is not provided, memoizes everything that get returned by {@link Reflect.ownKeys} when provided with {@link obj}.
  * The {@link equals} parameter defaults to `false` to allow the specific reactive value to have control over when its dependant effects are triggered
  * @param obj Object to partially memoize
  * @param keys The keys of the properties to memoize
@@ -14,7 +14,7 @@ type Equals = MemoOptions<unknown>["equals"];
  */
 export function memoProps<T>(obj: T, keys?: undefined, equals?: Equals): T;
 export function memoProps<T, K extends readonly (keyof T)[]>(obj: T, keys: K, equals?: Equals): Pick<T, K[number]>;
-export function memoProps(obj: any, keys: PropertyKey[] = Object.keys(obj), equals: Equals = false) {
+export function memoProps(obj: any, keys: PropertyKey[] = Reflect.ownKeys(obj), equals: Equals = false) {
     const out = {};
     for (const elm of keys)
         Object.defineProperty(out, elm, { enumerable: true, get: createMemo(() => obj[elm], undefined, { equals }) });
