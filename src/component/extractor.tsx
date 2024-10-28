@@ -28,7 +28,7 @@ type Info = ParentProps<Slot & { order?: number }>;
  *          </e.Source>
  *      </div>
  *  </e.Joint>
- * <>
+ * </>
  * ```
  * @param name Name to give to the context of the extractor
  */

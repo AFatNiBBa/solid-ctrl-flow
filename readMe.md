@@ -59,7 +59,6 @@ return <>
     <On value={value}>
       <Case value={1}>One</Case>
       <Case value={2}>Two</Case>
-      <Case pred={x => `${x}`.length === 3}>Long</Case>
     </On>
     <Match when>Default</Match>
   </Switch>
@@ -72,7 +71,6 @@ return <>
   <Switch>
     <Match when={value === 1}>One</Match>
     <Match when={value === 2}>Two</Match>
-    <Match when={`${value}`.length === 3}>Long</Match>
     <Match when>Default</Match>
   </Switch>
 </>
