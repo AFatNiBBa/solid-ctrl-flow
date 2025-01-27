@@ -22,17 +22,16 @@ export function memoProps(obj: any, keys: PropertyKey[] = Reflect.ownKeys(obj), 
 }
 
 /**
- * Executes {@link splitProps} and memoizes the first of the two returned objects using {@link memoProps}.
- * Unlike {@link splitProps}, this doesn't support multiple key-sets out of the box
+ * Executes {@link splitProps} and memoizes every returned object but the last one using {@link memoProps}
  * @param obj Object to split and partially memoize
- * @param keys The keys of the properties to memoize and to include in the first of the two objects
- * @param equals The comparator function to use on the newly created memos
+ * @param keys The lists of the keys to split from {@link obj}
  */
-export function splitAndMemoProps<T extends Record<any, any>, K extends readonly (keyof T)[]>(obj: T, keys: K, equals?: Equals) {
-    const out = splitProps(obj, keys);
-    out[0] = memoProps(out[0], keys, equals);
+export const splitAndMemoProps: typeof splitProps = (obj, ...keys) => {
+    const out = splitProps(obj, ...keys);
+    for (var i = 0; i < keys.length; i++)
+        out[i] = memoProps(out[i], keys[i] as any) as any;
     return out;
-}
+};
 
 /**
  * Executes {@link f} untracking it.
