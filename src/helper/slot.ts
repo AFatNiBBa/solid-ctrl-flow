@@ -4,6 +4,7 @@ export interface Slot { slot?: number; }
 
 /** Utility of {@link Slot}s */
 export namespace Slot {
+    
     /**
      * Pushes an element into a slotted list
      * @param list The list in which to add the element
@@ -21,7 +22,8 @@ export namespace Slot {
     export const remove = <T extends Slot>(list: T[], v: T) => v.slot != null ? removeAt(list, v.slot) : v;
 
     /**
-     * Removes an element from a slotted list
+     * Removes an element from a slotted list.
+     * The function returns `undefined` ONLY if the index is out of range (A {@link Slot} can't be `undefined`)
      * @param list The list from which to remove the element
      * @param i The index at which to remove the element
      * @returns The removed element
@@ -34,5 +36,15 @@ export namespace Slot {
         out.slot = undefined;
         list[last.slot = i] = last;
         return out;
+    }
+
+    /**
+     * Restores the indexes of a slotted list.
+     * This function is useful after a sort, filter, or any other operation that changes the order of the elements in the list without taking care of {@link Slot}s
+     * @param list The list to restore
+     */
+    export function restore(list: Slot[]) {
+        for (var i = 0; i < list.length; i++)
+            list[i].slot = i;
     }
 }
