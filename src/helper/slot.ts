@@ -42,9 +42,11 @@ export namespace Slot {
      * Restores the indexes of a slotted list.
      * This function is useful after a sort, filter, or any other operation that changes the order of the elements in the list without taking care of {@link Slot}s
      * @param list The list to restore
+     * @param start The index at which to start restoring the indexes
+     * @param end The index at which to stop restoring the indexes
      */
-    export function restore(list: Slot[]) {
-        for (var i = 0; i < list.length; i++)
+    export function restore(list: Slot[], start = 0, end = list.length) {
+        for (var i = start; i < end; i++)
             list[i].slot = i;
     }
 }
