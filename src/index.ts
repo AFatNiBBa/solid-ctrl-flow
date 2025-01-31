@@ -4,7 +4,7 @@ import { Context, JSX, Owner, ParentProps, createMemo, getOwner } from "solid-js
 export * from "./component/enfold";
 export * from "./component/extractor";
 export * from "./component/switch";
-export * from "./helper/slot";
+export * from "./helper/orderedLinkedList";
 export * from "./helper/unwrap";
 export * from "./helper/util";
 

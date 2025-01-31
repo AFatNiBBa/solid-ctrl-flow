@@ -1,21 +1,30 @@
 
-import { ComponentProps, Context, For, ParentProps, Show, createContext, createMemo, getOwner, onCleanup, useContext } from "solid-js";
-import { createMutable } from "solid-js/store";
-import { Slot } from "../helper/slot";
-import { SameContext } from "..";
+import { Context, createContext, createMemo, createRenderEffect, createSignal, For, on, onCleanup, Owner, ParentProps, useContext } from "solid-js";
+import { OrderedLinkedList, OrderedLinkedListNode } from "../helper/orderedLinkedList";
+import { Portal } from "solid-js/web";
 
-/** Type of the data stored in each context created by {@link createExtractor} */
-type Store = { attached: number, source: Info[] };
+/** A function that compares the order in which a {@link Source} should be rendered inside a {@link Dest} */
+const COMPARATOR = (a: Info, b: Info) => (a.order ?? 0) - (b.order ?? 0);
 
-/** Informations about a {@link Source} component */
-type Info = ParentProps<Slot & { order?: number }>;
+/** Informations about a single {@link Source} */
+type Info = ParentProps<{ order?: number }>;
+
+/** Type of the data stored in the {@link Context} created by each {@link Extractor} */
+interface State {
+    readonly sources: OrderedLinkedList<Info>;
+    readonly extracting: number;
+    shift(k: number): void;
+    force(): void;
+}
 
 /**
- * Creates a slot that allows you to show a component outside of its parent.
+ * Friendlier version of the {@link Portal}.
  * It works with arbitrary nesting.
+ * The components communicate only if they're part of the same {@link Extractor}.
+ * It is uncommon for an {@link Extractor} to be defined inside a component.
  * Example:
  * ```tsx
- * const e = createExtractor();
+ * const e = new Extractor();
  * return <>
  *  <e.Joint>
  *      <div id="something">
@@ -23,83 +32,71 @@ type Info = ParentProps<Slot & { order?: number }>;
  *      </div>
  *      <div id="something-else">
  *          <e.Source>
- *              This text will be shown instead of `e.Dest`.
- *              If there weren't to be any `e.Joint` ancestor, then this text would have stayed here
+ *              This text will be shown instead of `e.Dest`
  *          </e.Source>
  *      </div>
  *  </e.Joint>
  * </>
  * ```
- * @param name Name to give to the context of the extractor
  */
-export function createExtractor(name = "extractor") {
-    const ctx = createContext<Store>(undefined, { name });
-    return {
-        /** Shows the content of the closest {@link Source} child of the closest {@link Joint} ancestor of this component */
-        Dest: Dest.bind(ctx),
+export class Extractor {
+    constructor(name?: string) { this.ctx = createContext(undefined, { name }); }
 
-        /** Puts its content inside of a {@link Dest} if it is available; There is no need to include this component on the DOM tree */
-        Source: Source.bind(ctx),
+    readonly ctx: Context<State | undefined>;
+    Joint = Joint.bind(this);
+    Dest = Dest.bind(this);
+    Source = Source.bind(this);
 
-        /** Allows {@link Dest} and {@link Source} childrens to communicate with each other  */
-        Joint: Joint.bind(ctx),
-
-        /**
-         * Gets an {@link Accessor} that tells if the context in which THIS getter has been executed has been extracted (Is inside of a {@link Dest})
-         * @returns Returns `null` if there is no parent {@link Joint}, the number of {@link Dest}s in which this component is being displayed otherwise (Usually 1)
-         */
-        get extracting() {
-            const obj = useContext(ctx);
-            return () => obj?.attached ?? null;
-        }
+    /**
+     * Returns the number of destinations available for the current {@link Extractor}.
+     * It's a getter that returns a function that will be bound to the {@link Owner} in which the getter was called.
+     * If the current {@link Owner} is NOT under a {@link Joint}, it will return `undefined`
+     */
+    get getDestCount() {
+        const state = useContext(this.ctx);
+        return state && (() => state.extracting);
     }
 }
 
+/** Unbound joint component */
+function Joint(this: Extractor, props: ParentProps) {
+    const state = createState();
+    return <this.ctx.Provider value={state} children={props.children} />
+}
+
 /** Unbound destination component */
-function Dest(this: Context<Store | undefined>) {
-    const obj = useContext(this);
-    if (!obj) return;
-    obj.attached++;
-    onCleanup(() => obj.attached--);
-    return <>
-        {/* It's important to clone `obj.source` before sorting it, otherwise the indexes of the slots would be fucked up */}
-        <For each={obj.source.toSorted((a, b) => (a.order ?? 0) - (b.order ?? 0))}>
-            {x => <>{x.children}</>}
-        </For>
-    </>
+function Dest(this: Extractor) {
+    const state = useContext(this.ctx);
+    if (!state) throw new Error("An extractor's destination must be inside one of its joints");
+    state.shift(1);
+    onCleanup(() => state.shift(-1));
+    return <For each={[ ...state.sources ]} children={x => <>{x.children}</>} />
 }
 
 /** Unbound source component */
-function Source(this: Context<Store | undefined>, props: Info & { sameContext?: boolean }) {
-    const obj = useContext(this);
-    if (!obj) return <>{props.children}</>;
-    const info = createInfo(props);
-    Slot.push(obj.source, info);
-    onCleanup(() => Slot.remove(obj.source, info));
-    return <Show when={!obj.attached} children={info.children} />
+function Source(this: Extractor, props: Info) {
+    const state = useContext(this.ctx);
+    if (!state) throw new Error("An extractor's source must be inside one of its joints");
+    const { sources, force } = state; // Reads them only once, we don't need reactivity here anyway
+    const order = createMemo(() => props.order);
+    const info = { get order() { return order(); }, get children() { return props.children; } };
+    const node = new OrderedLinkedListNode(info);
+    createRenderEffect(on(order, () => {
+        onCleanup(() => node.remove());
+        sources.add(node, COMPARATOR);
+        force();
+    }));
+    return <></>
 }
 
-/** Unbound joint component */
-function Joint(this: Context<Store | undefined>, props: ParentProps) {
-    const { Provider } = this;
-    const obj = createMutable<Store>({ attached: 0, source: [] });      // The `source` property is needed to be an array in order to make it mutable
-    return <Provider value={obj} children={props.children} />
-}
-
-/**
- * Creates an {@link Info} that will be stored inside a {@link Store} from the props passed to a {@link Source}
- * @param props The attributes passed to a {@link Source}
- */
-function createInfo(props: ComponentProps<typeof Source>): Info {
-    const owner = getOwner()!, memo = createMemo(() => props.order);    // Memoizes only `order`
+/** Creates a {@link State} object */
+function createState(): State {
+    const [ getExtracting, setExtracting ] = createSignal(0, { internal: true });
+    const [ getSources, setSources ] = createSignal(new OrderedLinkedList<Info>(), { internal: true, equals: false });
     return {
-        get order() { return memo(); },
-        get children() {
-            return <>
-                <Show when={props.sameContext} fallback={props.children}>
-                    <SameContext owner={owner} children={props.children} />
-                </Show>
-            </>
-        }
+        get sources() { return getSources(); },
+        get extracting() { return getExtracting(); },
+        shift: k => setExtracting(v => v + k),
+        force: () => setSources(s => s)
     };
 }

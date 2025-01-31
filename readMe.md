@@ -76,87 +76,76 @@ return <>
 </>
 ```
 
-### `createExtractor()`
-Creates a context for components that may need to be out of their parent in certain conditions.
-If you have this component
+### `Extractor`
+Friendlier version of the `Portal`.
+Example:
 ```tsx
-const myCustomExtractor = createExtractor();
+const e = new Extractor();
+return <>
+  <e.Joint>
+    <div id="something">
+      <e.Dest />
+    </div>
+    <div id="something-else">
+      <e.Source>
+        This text will be shown instead of `e.Dest`
+      </e.Source>
+    </div>
+  </e.Joint>
+</>
+```
+Both `Extractor.Source` and `Extractor.Dest` will throw if they're not inside a `Extractor.Joint`.
+<br />
+Componets from different `Extractor`s don't "talk" to each other and there can be more than one source and destinations:
+```tsx
+const a = new Extractor(), b = new Extractor(), c = new Extractor()
 
-function MyCustomComponent() {
+function ProofThatItWorksCrossComponent() {
   return <>
-    1
-    <myCustomExtractor.Source>
-      2 {/* THIS WILL BE MOVED INSIDE THE "Dest" */}
-    </myCustomExtractor.Source>
-    3
+    0
+    {/* Sources will be sorted by the "order" attribute before being rendered inside a destination */}
+    {/* The value defaults to 0 and doesn't need to be an integer */}
+    <a.Source order={-1.1}>
+      1
+    </a.Source>
+    2
   </>
 }
-```
-If you use it normally it will output `4`, ***`1`***, ***`2`***, ***`3`***, `5`
-```tsx
+
 return <>
-  4
-  <MyCustomComponent />
-  5
+  <a.Joint>
+    <a.Dest />
+    <b.Joint>
+      {/* No source */}
+      <b.Dest />
+      <c.Joint>
+        3
+        {/* Double destination */}
+        <a.Dest />
+        4
+        <a.Source>
+          5
+        </a.Source>
+        <c.Source>
+          {/* No destination */}
+          6
+        </c.Source>
+        <ProofThatItWorksCrossComponent />
+        <c.Joint>
+          {/* Inner scope for the "c" extractor */}
+          <c.Dest />
+          7
+          <c.Source>
+            8
+          </c.Source>
+          <c.Dest />
+        </c.Joint>
+      </c.Joint>
+    </b.Joint>
+  </a.Joint>
 </>
 ```
-But if you use it together with a `Dest` and a `Joint` it will output `6`, `7`, `8`, ***`2`***, `9`, `10`, `11`, ***`1`***, ***`3`***, `12`, `13`, `14`
-```tsx
-return <>
-  6
-  <myCustomExtractor.Joint>
-    7
-    <div>
-      8
-      <myCustomExtractor.Dest /> {/* THE CONTENT OF "Source" WILL BE MOVED HERE */}
-      9
-    </div>
-    10
-    <div>
-      11
-      <MyCustomComponent />
-      12
-    </div>
-    13
-  </myCustomExtractor.Joint>
-  14
-</>
-```
-The `Joint` component is necessary for the `Source` and the `Dest` to communicate with each other.
-For example this will output `15`, `16`, `17`, `18`, `19`, ***`1`***, ***`2`***, ***`3`***, `20`, `21`
-```tsx
-return <>
-  15
-  <div>
-    16
-    <myCustomExtractor.Dest />
-    17
-  </div>
-  18
-  <div>
-    19
-    <MyCustomComponent />
-    20
-  </div>
-  21
-</>
-```
-Notice that you can use a `Source` component without adding it to the DOM:
-```tsx
-<myCustomExtractor.Source>
-  {/* This doesn't get returned, but still gets shown if there is an available "Dest" */}
-  Something
-</myCustomExtractor.Source>
-return <>Something else</>
-```
-When something gets moved from a `Source` to a `Dest`, it will inherit contexts from its destination, UNLESS you use the `sameContext` attribute
-```tsx
-return <>
-  <myCustomExtractor.Source sameContext>
-    ...
-  </myCustomExtractor.Source>
-</>
-```
+The output of this code is ***1***, ***5***, 3, ***1***, ***5***, 4, 0, 2, ***8***, 7, ***8***
 
 ## Utility
 
