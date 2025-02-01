@@ -24,7 +24,7 @@ export class OrderedLinkedList<T> {
      */
 	add(node: OrderedLinkedListNode<T>, comp: (a: T, b: T) => number): OrderedLinkedListNode<T> {
 		const { next } = this;
-		if (next && comp(node.value, next.value) >= 0) return next.add(node, comp);
+		if (next && comp(node.value, next.value) > 0) return next.add(node, comp);
 		this.next = node;
 		node.prev = this;
 		if (next) (node.next = next).prev = node;
