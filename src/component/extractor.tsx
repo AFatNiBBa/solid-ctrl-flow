@@ -96,14 +96,14 @@ function Dest(this: Extractor, props: { hidden?: boolean }) {
 function Source(this: Extractor, props: Info) {
     const state = useContext(this.ctx);
     if (!state) throw new Error("An extractor's source must be inside one of its joints");
-    const { sources, force } = state; // Reads them only once, we don't need reactivity here anyway
+    const { sources } = state; // Reads it only once, we don't need reactivity here anyway
     const order = createMemo(() => props.order);
     const info = { get order() { return order(); }, get children() { return props.children; } };
     const node = new OrderedLinkedListNode(info);
     createRenderEffect(on(order, () => {
         onCleanup(() => node.remove());
         sources.add(node, COMPARATOR);
-        force();
+        state.force();
     }));
     return <></>
 }
