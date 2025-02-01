@@ -145,7 +145,79 @@ return <>
   </a.Joint>
 </>
 ```
-The output of this code is ***1***, ***5***, 3, ***1***, ***5***, 4, 0, 2, ***8***, 7, ***8***
+The output of this code is ***1***, ***5***, 3, ***1***, ***5***, 4, 0, 2, ***8***, 7, ***8***.
+<br />
+You can detect the number of destinations available for a given extractor through `Extractor.getDestCount()`
+```tsx
+const e = new Extractor();
+const [ g, s ] = createSignal(true);
+return <>
+  {void untrack(() => {
+    // The function is `undefined` when we're not under an `Extractor.Joint`
+    console.log(e.getDestCount); //→ undefined
+  })}
+  <e.Joint>
+    {untrack(() => {
+      // The founction is returned by a getter that bounds it to the current context
+      const f = e.getDestCount!;
+      return <>
+        {untrack(() => {
+          // (This scope is not reactive, so it doesn't know about the destinations that will come up later)
+          console.log(f()); //→ 0
+        })}
+
+        <e.Dest />
+        {untrack(() => {
+          console.log(f()); //→ 1
+        })}
+
+        <e.Dest />
+
+        <Show when={g()}>
+          <e.Dest />
+        </Show>
+
+        <button onClick={() => s(x => !x)}>
+          Toggle
+        </button>
+        <br />
+        {/* This is reactive and will contain the number 2 or 3 depending on `g()` */}
+        {JSON.stringify(g())} - {f()}
+
+        <e.Joint>
+          {untrack(() => {
+            // Since `f()` is bound, it will return the destination count of ITS `Extractor.Joint`, not the closest one
+            console.log(f()); //→ 3
+            console.log(e.getDestCount!()); //→ 0
+          })}
+        </e.Joint>
+      </>
+    })}
+  </e.Joint>
+</>
+```
+You can NOT do this to create a fallback destination for when there aren't any other
+```tsx
+return <>
+  <Show when={!someExtractor.getDestCount!()}>
+    <someExtractor.Dest />
+  </Show>
+</>
+```
+Because it would start a strange loop due to which the new destination would disable itself. To do that you must use the `hidden` attribute, which will made sure that the destination is not considered by `Extractor.getDestCount()` at all
+```tsx
+return <>
+  <Show when={!someExtractor.getDestCount!()}>
+    <someExtractor.Dest hidden />
+  </Show>
+</>
+```
+Due to this pattern being fairly common, there's the `Extractor.Fallback` component that does that exact thing
+```tsx
+return <>
+  <someExtractor.Fallback />
+</>
+```
 
 ## Utility
 

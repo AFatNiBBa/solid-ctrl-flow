@@ -1,20 +1,26 @@
 
-import { Context, createContext, createMemo, createRenderEffect, createSignal, For, on, onCleanup, Owner, ParentProps, useContext } from "solid-js";
+import { Context, createContext, createMemo, createRenderEffect, createSignal, For, on, onCleanup, Owner, ParentProps, Show, Signal, SignalOptions, useContext } from "solid-js";
 import { OrderedLinkedList, OrderedLinkedListNode } from "../helper/orderedLinkedList";
 import { Portal } from "solid-js/web";
 
 /** A function that compares the order in which a {@link Source} should be rendered inside a {@link Dest} */
 const COMPARATOR = (a: Info, b: Info) => (a.order ?? 0) - (b.order ?? 0);
 
+/** Options for the {@link Signal}s inside {@link State} */
+const SOURCES_OPTS: SignalOptions<OrderedLinkedList<Info>> = { internal: true, equals: false }, DEST_COUNT_OPTS: SignalOptions<number> = { internal: true };
+
 /** Informations about a single {@link Source} */
 type Info = ParentProps<{ order?: number }>;
 
 /** Type of the data stored in the {@link Context} created by each {@link Extractor} */
-interface State {
-    readonly sources: OrderedLinkedList<Info>;
-    readonly extracting: number;
-    shift(k: number): void;
-    force(): void;
+class State {
+    #sources = createSignal(new OrderedLinkedList<Info>(), SOURCES_OPTS);
+    #destCount = createSignal<number>(0, DEST_COUNT_OPTS);
+
+    get sources() { return this.#sources[0](); }
+    get destCount() { return this.#destCount[0](); }
+    shift(k: number) { this.#destCount[1](v => v + k); }
+    force() { this.#sources[1](v => v); }
 }
 
 /**
@@ -34,6 +40,9 @@ interface State {
  *          <e.Source>
  *              This text will be shown instead of `e.Dest`
  *          </e.Source>
+ * 
+ *          This would have been shown if there wasn't any `e.Dest`
+ *          <e.Fallback />
  *      </div>
  *  </e.Joint>
  * </>
@@ -44,6 +53,7 @@ export class Extractor {
 
     readonly ctx: Context<State | undefined>;
     Joint = Joint.bind(this);
+    Fallback = Fallback.bind(this);
     Dest = Dest.bind(this);
     Source = Source.bind(this);
 
@@ -54,22 +64,31 @@ export class Extractor {
      */
     get getDestCount() {
         const state = useContext(this.ctx);
-        return state && (() => state.extracting);
+        return state && (() => state.destCount);
     }
 }
 
 /** Unbound joint component */
 function Joint(this: Extractor, props: ParentProps) {
-    const state = createState();
+    const state = new State();
     return <this.ctx.Provider value={state} children={props.children} />
 }
 
+/** Unbound fallback destination component */
+function Fallback(this: Extractor) {
+    const f = this.getDestCount;
+    return <Show when={!f?.()} children={<this.Dest hidden />} />
+}
+
 /** Unbound destination component */
-function Dest(this: Extractor) {
+function Dest(this: Extractor, props: { hidden?: boolean }) {
     const state = useContext(this.ctx);
     if (!state) throw new Error("An extractor's destination must be inside one of its joints");
-    state.shift(1);
-    onCleanup(() => state.shift(-1));
+    createRenderEffect(on(createMemo(() => props.hidden), x => {
+        if (x) return;
+        onCleanup(() => state.shift(-1));
+        state.shift(1);
+    }));
     return <For each={[ ...state.sources ]} children={x => <>{x.children}</>} />
 }
 
@@ -87,16 +106,4 @@ function Source(this: Extractor, props: Info) {
         force();
     }));
     return <></>
-}
-
-/** Creates a {@link State} object */
-function createState(): State {
-    const [ getExtracting, setExtracting ] = createSignal(0, { internal: true });
-    const [ getSources, setSources ] = createSignal(new OrderedLinkedList<Info>(), { internal: true, equals: false });
-    return {
-        get sources() { return getSources(); },
-        get extracting() { return getExtracting(); },
-        shift: k => setExtracting(v => v + k),
-        force: () => setSources(s => s)
-    };
 }
