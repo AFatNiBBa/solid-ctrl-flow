@@ -17,14 +17,15 @@ export class OrderedLinkedList<T> {
 	}
 
     /**
-     * Adds a node to the list in order
+     * Adds a node to the list in order.
+	 * If two nodes have the same order, it would have been more efficient to put the latest one first, but this would not have been ok, since we also want to order by insertion time
      * @param node The node to add
      * @param comp The comparison function to use
      * @returns The same value as {@link node}
      */
 	add(node: OrderedLinkedListNode<T>, comp: (a: T, b: T) => number): OrderedLinkedListNode<T> {
 		const { next } = this;
-		if (next && comp(node.value, next.value) > 0) return next.add(node, comp);
+		if (next && comp(node.value, next.value) >= 0) return next.add(node, comp);
 		this.next = node;
 		node.prev = this;
 		if (next) (node.next = next).prev = node;

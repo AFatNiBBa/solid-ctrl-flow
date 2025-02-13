@@ -101,7 +101,10 @@ function Source(this: Extractor, props: Info) {
     const info = { get order() { return order(); }, get children() { return props.children; } };
     const node = new OrderedLinkedListNode(info);
     createRenderEffect(on(order, () => {
-        onCleanup(() => node.remove());
+        onCleanup(() => {
+            node.remove();
+            state.force();
+        });
         sources.add(node, COMPARATOR);
         state.force();
     }));
