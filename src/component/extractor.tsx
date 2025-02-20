@@ -1,7 +1,8 @@
 
-import { Context, createContext, createMemo, createRenderEffect, createSignal, For, on, onCleanup, Owner, ParentProps, Show, Signal, SignalOptions, useContext } from "solid-js";
+import { ComponentProps, Context, createContext, createMemo, createRenderEffect, createSignal, For, getOwner, JSX, on, onCleanup, Owner, ParentProps, Show, Signal, SignalOptions, splitProps, useContext } from "solid-js";
 import { OrderedLinkedList, OrderedLinkedListNode } from "../helper/orderedLinkedList";
 import { Portal } from "solid-js/web";
+import { SameContext } from "..";
 
 /** A function that compares the order in which a {@link Source} should be rendered inside a {@link Dest} */
 const COMPARATOR = (a: Info, b: Info) => (a.order ?? 0) - (b.order ?? 0);
@@ -53,9 +54,9 @@ export class Extractor {
 
     readonly ctx: Context<State | undefined>;
     Joint = Joint.bind(this);
-    Fallback = Fallback.bind(this);
     Dest = Dest.bind(this);
     Source = Source.bind(this);
+    SameContextSource = SameContextSource.bind(this);
 
     /**
      * Returns the number of destinations available for the current {@link Extractor}.
@@ -74,31 +75,26 @@ function Joint(this: Extractor, props: ParentProps) {
     return <this.ctx.Provider value={state} children={props.children} />
 }
 
-/** Unbound fallback destination component */
-function Fallback(this: Extractor) {
-    const f = this.getDestCount;
-    return <Show when={!f?.()} children={<this.Dest hidden />} />
-}
-
 /** Unbound destination component */
-function Dest(this: Extractor, props: { hidden?: boolean }) {
+function Dest(this: Extractor, props: ParentProps) {
     const state = useContext(this.ctx);
-    if (!state) throw new Error("An extractor's destination must be inside one of its joints");
-    createRenderEffect(on(createMemo(() => props.hidden), x => {
-        if (x) return;
-        onCleanup(() => state.shift(-1));
-        state.shift(1);
-    }));
-    return <For each={[ ...state.sources ]} children={x => <>{x.children}</>} />
+    if (!state) return <>{props.children}</>;
+    onCleanup(() => state.shift(-1));
+    state.shift(1);
+    return <>
+        <For each={[ ...state.sources ]} fallback={props.children}>
+            {x => <>{x.children}</>}
+        </For>
+    </>
 }
 
 /** Unbound source component */
-function Source(this: Extractor, props: Info) {
+function Source(this: Extractor, props: Info & { fallback?: JSX.Element }) {
     const state = useContext(this.ctx);
-    if (!state) throw new Error("An extractor's source must be inside one of its joints");
+    if (!state) return <>{props.fallback}</>;
     const { sources } = state; // Reads it only once, we don't need reactivity here anyway
     const order = createMemo(() => props.order);
-    const info = { get order() { return order(); }, get children() { return props.children; } };
+    const info: Info = { get order() { return order(); }, get children() { return props.children; } };
     const node = new OrderedLinkedListNode(info);
     createRenderEffect(on(order, () => {
         onCleanup(() => {
@@ -108,5 +104,18 @@ function Source(this: Extractor, props: Info) {
         sources.add(node, COMPARATOR);
         state.force();
     }));
-    return <></>
+    return <Show when={!state.destCount} children={props.fallback} />
+}
+
+/** Like {@link Source} but it wraps its children inside a {@link SameContext} */
+function SameContextSource(this: Extractor, props: ComponentProps<typeof Source>) {
+    const [ mine, other ] = splitProps(props, [ "children" ]);
+    const owner = getOwner()!;
+    return <>
+        <this.Source {...other}>
+            <SameContext owner={owner}>
+                {mine.children}
+            </SameContext>
+        </this.Source>
+    </>
 }

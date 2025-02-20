@@ -94,7 +94,9 @@ return <>
   </e.Joint>
 </>
 ```
-Both `Extractor.Source` and `Extractor.Dest` will throw if they're not inside a `Extractor.Joint`.
+If a `Extractor.Dest` has no `Extractor.Source` to render (Or it isn't inside a `Extractor.Joint`), it will render whatever you pass inside the `children` attribute
+<br />
+If a `Extractor.Source` has no available `Extractor.Dest` (Or it isn't inside a `Extractor.Joint`), it will render whatever you pass inside the `fallback` attribute
 <br />
 Componets from different `Extractor`s don't "talk" to each other and there can be more than one source and destinations:
 ```tsx
@@ -117,7 +119,7 @@ return <>
     <a.Dest />
     <b.Joint>
       {/* No source */}
-      <b.Dest />
+      <b.Dest>fb1</b.Dest>
       <c.Joint>
         3
         {/* Double destination */}
@@ -126,7 +128,7 @@ return <>
         <a.Source>
           5
         </a.Source>
-        <c.Source>
+        <c.Source fallback="fb2">
           {/* No destination */}
           6
         </c.Source>
@@ -145,7 +147,7 @@ return <>
   </a.Joint>
 </>
 ```
-The output of this code is ***1***, ***5***, 3, ***1***, ***5***, 4, 0, 2, ***8***, 7, ***8***.
+The output of this code is ***1***, ***5***, ~~fb1~~, 3, ***1***, ***5***, 4, ~~fb2~~, 0, 2, ***8***, 7, ***8***.
 <br />
 You can detect the number of destinations available for a given extractor through `Extractor.getDestCount()`
 ```tsx
@@ -196,26 +198,26 @@ return <>
   </e.Joint>
 </>
 ```
-You can NOT do this to create a fallback destination for when there aren't any other
+You can use `Extractor.SameContextSource` to automate the process of using a `SameContext` inside a `Extractor.Source`. When in doubt, use `Extractor.SameContextSource` instead of `Extractor.Source`
 ```tsx
+const e = new Extractor(), ctx = createContext(1);
 return <>
-  <Show when={!someExtractor.getDestCount!()}>
-    <someExtractor.Dest />
-  </Show>
-</>
-```
-Because it would start a strange loop due to which the new destination would disable itself. To do that you must use the `hidden` attribute, which will made sure that the destination is not considered by `Extractor.getDestCount()` at all
-```tsx
-return <>
-  <Show when={!someExtractor.getDestCount!()}>
-    <someExtractor.Dest hidden />
-  </Show>
-</>
-```
-Due to this pattern being fairly common, there's the `Extractor.Fallback` component that does that exact thing
-```tsx
-return <>
-  <someExtractor.Fallback />
+  <e.Joint>
+    <div>
+      {/* This will contain "1" and "3" */}
+      <e.Dest />
+    </div>
+    <ctx.Provider value={2}>
+      <div>
+        {/* This will contain "2" and "3" */}
+        <e.Dest />
+      </div>
+      <ctx.Provider value={3}>
+        <e.Source>{useContext(ctx)}</e.Source>
+        <e.SameContextSource>{useContext(ctx)}</e.SameContextSource>
+      </ctx.Provider>
+    </ctx.Provider>
+  </e.Joint>
 </>
 ```
 
