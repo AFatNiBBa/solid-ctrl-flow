@@ -89,9 +89,9 @@ function Dest(this: Extractor, props: ParentProps) {
 }
 
 /** Unbound source component */
-function Source(this: Extractor, props: Info & { fallback?: JSX.Element }) {
+function Source(this: Extractor, props: Info) {
     const state = useContext(this.ctx);
-    if (!state) return <>{props.fallback}</>;
+    if (!state) return <></>;
     const { sources } = state; // Reads it only once, we don't need reactivity here anyway
     const order = createMemo(() => props.order);
     const info: Info = { get order() { return order(); }, get children() { return props.children; } };
@@ -104,7 +104,6 @@ function Source(this: Extractor, props: Info & { fallback?: JSX.Element }) {
         sources.add(node, COMPARATOR);
         state.force();
     }));
-    return <Show when={!state.destCount} children={props.fallback} />
 }
 
 /** Like {@link Source} but it wraps its children inside a {@link SameContext} */

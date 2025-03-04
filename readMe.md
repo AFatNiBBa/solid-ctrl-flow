@@ -96,8 +96,6 @@ return <>
 ```
 If a `Extractor.Dest` has no `Extractor.Source` to render (Or it isn't inside a `Extractor.Joint`), it will render whatever you pass inside the `children` attribute
 <br />
-If a `Extractor.Source` has no available `Extractor.Dest` (Or it isn't inside a `Extractor.Joint`), it will render whatever you pass inside the `fallback` attribute
-<br />
 Componets from different `Extractor`s don't "talk" to each other and there can be more than one source and destinations:
 ```tsx
 const a = new Extractor(), b = new Extractor(), c = new Extractor()
@@ -119,7 +117,7 @@ return <>
     <a.Dest />
     <b.Joint>
       {/* No source */}
-      <b.Dest>fb1</b.Dest>
+      <b.Dest>fb</b.Dest>
       <c.Joint>
         3
         {/* Double destination */}
@@ -128,7 +126,7 @@ return <>
         <a.Source>
           5
         </a.Source>
-        <c.Source fallback="fb2">
+        <c.Source>
           {/* No destination */}
           6
         </c.Source>
@@ -147,7 +145,7 @@ return <>
   </a.Joint>
 </>
 ```
-The output of this code is ***1***, ***5***, ~~fb1~~, 3, ***1***, ***5***, 4, ~~fb2~~, 0, 2, ***8***, 7, ***8***.
+The output of this code is ***1***, ***5***, ~~fb~~, 3, ***1***, ***5***, 4, 0, 2, ***8***, 7, ***8***.
 <br />
 You can detect the number of destinations available for a given extractor through `Extractor.getDestCount()`
 ```tsx
