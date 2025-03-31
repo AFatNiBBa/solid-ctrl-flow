@@ -1,41 +1,5 @@
 
-import { Context, MemoOptions, Ref, createMemo, createRoot, getOwner, splitProps, untrack } from "solid-js";
-
-/** Function that does nothing */
-const NO_OP = () => { };
-
-/** Handy type alias */
-type Equals = MemoOptions<unknown>["equals"];
-
-/**
- * Memoizes some of the properties of {@link obj}.
- * If {@link keys} is not provided, memoizes everything that get returned by {@link Reflect.ownKeys} when provided with {@link obj}.
- * The {@link equals} parameter defaults to `false` to allow the specific reactive value to have control over when its dependant effects are triggered.
- * The memoized properties have {@link NO_OP} as setter, this is needed because {@link Ref}s are assigned if they're not functions, so an `undefined` forwarded {@link Ref} would throw in that case (In strict contexts)
- * @param obj Object to partially memoize
- * @param keys The keys of the properties to memoize
- * @param equals The comparator function to use on the newly created memos
- */
-export function memoProps<T>(obj: T, keys?: undefined, equals?: Equals): T;
-export function memoProps<T, K extends readonly (keyof T)[]>(obj: T, keys: K, equals?: Equals): Pick<T, K[number]>;
-export function memoProps(obj: any, keys: PropertyKey[] = Reflect.ownKeys(obj), equals: Equals = false) {
-    const out = {};
-    for (const elm of keys)
-        Object.defineProperty(out, elm, { enumerable: true, set: NO_OP, get: createMemo(() => obj[elm], undefined, { equals }) });
-    return out;
-}
-
-/**
- * Executes {@link splitProps} and memoizes every returned object but the last one using {@link memoProps}
- * @param obj Object to split and partially memoize
- * @param keys The lists of the keys to split from {@link obj}
- */
-export const splitAndMemoProps: typeof splitProps = (obj, ...keys) => {
-    const out = splitProps(obj, ...keys);
-    for (var i = 0; i < keys.length; i++)
-        out[i] = memoProps(out[i], keys[i] as any) as any;
-    return out;
-};
+import { Context, createRoot, getOwner, untrack } from "solid-js";
 
 /**
  * Executes {@link f} untracking it.

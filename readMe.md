@@ -225,10 +225,10 @@ return <>
 Calls an `Accessor` maintaining its reactivity at 1 level
 
 ### `memoProps()`
-Creates a partial version of an object with memoized remaining properties
+Memoizes the properties of an object
 
 ### `splitAndMemoProps()`
-Like `splitProps()` but memoizes the whole local part
+Like `splitProps()` but passes the every part except the last one to [`memoProps()`](#memoprops)
 
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument
