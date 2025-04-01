@@ -20,7 +20,7 @@ export const memoProps = <T extends object>(obj: T, equals?: Equals) => new Prox
 export const splitAndMemoProps: typeof splitProps = (obj, ...keys) => {
     const out = splitProps(obj, ...keys);
     for (var i = 0; i < keys.length; i++)
-        out[i] = memoProps(out[i], keys[i] as any) as any;
+        out[i] = memoProps(out[i]);
     return out;
 };
 
