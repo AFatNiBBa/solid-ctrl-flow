@@ -26,5 +26,5 @@ export function SameContext(props: ParentProps<{ owner: Owner }>) {
 export function Spread<T extends Element>(props: { target: T } & JSX.HTMLAttributes<T>) {
     const [ mine, other ] = splitProps(props, [ "target" ]);
     createRenderEffect(on(() => mine.target, x => spread(x, other)));
-    return undefined; // (To make it understand that it's a component)
+    return undefined; // Returns to make TypeScript understand that this is a component
 }
