@@ -1,6 +1,9 @@
 
 import { Context, createRoot, getOwner, onCleanup, untrack } from "solid-js";
 
+/** Minimal representation of an event target */
+type AbstractEventTarget<K, F> = { addEventListener(k: K, f: F): void, removeEventListener(k: K, f: F): void };
+
 /**
  * Executes {@link f} untracking it.
  * Due to the fact that the function is passed as input, it does not untrack its changes (It's intentional)
@@ -19,7 +22,9 @@ export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisPar
  * @param k The key of the event for which to add the listener
  * @param f The function to call when the event is emitted
  */
-export function registerEventListener<K, F>(obj: { addEventListener(k: K, f: F): void, removeEventListener(k: K, f: F): void }, k: K, f: F) {
+export function registerEventListener<K extends keyof HTMLElementEventMap>(obj: HTMLElement, type: K, listener: (this: HTMLElement, e: HTMLElementEventMap[K]) => any): void;
+export function registerEventListener<K, F>(obj: AbstractEventTarget<K, F>, k: K, f: F): void;
+export function registerEventListener<K, F>(obj: AbstractEventTarget<K, F>, k: K, f: F) {
     obj.addEventListener(k, f);
     onCleanup(() => obj.removeEventListener(k, f));
 }
