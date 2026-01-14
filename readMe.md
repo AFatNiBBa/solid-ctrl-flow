@@ -233,5 +233,8 @@ Like `splitProps()` but passes the every part except the last one to [`memoProps
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument
 
+### `registerEventListener()`
+Adds an event listener and registers its removal
+
 ### `runWithContext()`
 Creates a context scope that persists for the duration of a function

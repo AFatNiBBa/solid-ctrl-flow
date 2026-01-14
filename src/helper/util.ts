@@ -1,5 +1,5 @@
 
-import { Context, createRoot, getOwner, untrack } from "solid-js";
+import { Context, createRoot, getOwner, onCleanup, untrack } from "solid-js";
 
 /**
  * Executes {@link f} untracking it.
@@ -11,6 +11,17 @@ import { Context, createRoot, getOwner, untrack } from "solid-js";
  */
 export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
     return untrack(() => f.apply(this, args) as ReturnType<F>);
+}
+
+/**
+ * Adds the {@link f} event listener to the {@link k} event of the {@link obj} emitter and removes it when the current reactive context is disposed
+ * @param obj The emitter to which to add the event listener
+ * @param k The key of the event for which to add the listener
+ * @param f The function to call when the event is emitted
+ */
+export function registerEventListener<K, F>(obj: { addEventListener(k: K, f: F): void, removeEventListener(k: K, f: F): void }, k: K, f: F) {
+    obj.addEventListener(k, f);
+    onCleanup(() => obj.removeEventListener(k, f));
 }
 
 /**
