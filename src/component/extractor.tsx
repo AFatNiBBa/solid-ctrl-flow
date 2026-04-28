@@ -1,5 +1,5 @@
 
-import { ComponentProps, Context, createContext, createMemo, createRenderEffect, createSignal, For, getOwner, JSX, on, onCleanup, Owner, ParentProps, Show, Signal, SignalOptions, splitProps, useContext } from "solid-js";
+import { batch, ComponentProps, Context, createContext, createMemo, createRenderEffect, createSignal, For, getOwner, on, onCleanup, Owner, ParentProps, Signal, SignalOptions, splitProps, useContext } from "solid-js";
 import { OrderedLinkedList, OrderedLinkedListNode } from "../helper/orderedLinkedList";
 import { Portal } from "solid-js/web";
 import { SameContext } from "..";
@@ -8,7 +8,7 @@ import { SameContext } from "..";
 const COMPARATOR = (a: Info, b: Info) => (a.order ?? 0) - (b.order ?? 0);
 
 /** Options for the {@link Signal}s inside {@link State} */
-const SOURCES_OPTS: SignalOptions<OrderedLinkedList<Info>> = { internal: true, equals: false }, DEST_COUNT_OPTS: SignalOptions<number> = { internal: true };
+const SOURCES_OPTS: SignalOptions<OrderedLinkedList<Info>> = { internal: true, equals: false }, COUNT_OPTS: SignalOptions<number> = { internal: true };
 
 /** Informations about a single {@link Source} */
 type Info = ParentProps<{ order?: number }>;
@@ -16,12 +16,23 @@ type Info = ParentProps<{ order?: number }>;
 /** Type of the data stored in the {@link Context} created by each {@link Extractor} */
 class State {
     #sources = createSignal(new OrderedLinkedList<Info>(), SOURCES_OPTS);
-    #destCount = createSignal<number>(0, DEST_COUNT_OPTS);
+    #sourceCount = createSignal<number>(0, COUNT_OPTS);
+    #destCount = createSignal<number>(0, COUNT_OPTS);
 
     get sources() { return this.#sources[0](); }
+    get sourceCount() { return this.#sourceCount[0](); }
     get destCount() { return this.#destCount[0](); }
-    shift(k: number) { this.#destCount[1](v => v + k); }
+
     force() { this.#sources[1](v => v); }
+    shiftSource(k: number) { this.#sourceCount[1](v => v + k); }
+    shiftDest(k: number) { this.#destCount[1](v => v + k); }
+
+    shiftSourceAndForce(k: number) {
+        batch(() => {
+            this.shiftSource(k);
+            this.force();
+        });
+    }
 }
 
 /**
@@ -59,6 +70,16 @@ export class Extractor {
     SameContextSource = SameContextSource.bind(this);
 
     /**
+     * Returns the number of sources available for the current {@link Extractor}.
+     * It's a getter that returns a function that will be bound to the {@link Owner} in which the getter was called.
+     * If the current {@link Owner} is NOT under a {@link Joint}, it will return `undefined`
+     */
+    get getSourceCount() {
+        const state = useContext(this.ctx);
+        return state && (() => state.sourceCount);
+    }
+
+    /**
      * Returns the number of destinations available for the current {@link Extractor}.
      * It's a getter that returns a function that will be bound to the {@link Owner} in which the getter was called.
      * If the current {@link Owner} is NOT under a {@link Joint}, it will return `undefined`
@@ -79,8 +100,8 @@ function Joint(this: Extractor, props: ParentProps) {
 function Dest(this: Extractor, props: ParentProps) {
     const state = useContext(this.ctx);
     if (!state) return <>{props.children}</>;
-    onCleanup(() => state.shift(-1));
-    state.shift(1);
+    onCleanup(() => state.shiftDest(-1));
+    state.shiftDest(1);
     return <>
         <For each={[ ...state.sources ]} fallback={props.children}>
             {x => <>{x.children}</>}
@@ -99,10 +120,10 @@ function Source(this: Extractor, props: Info) {
     createRenderEffect(on(order, () => {
         onCleanup(() => {
             node.remove();
-            state.force();
+            state.shiftSourceAndForce(-1);
         });
         sources.add(node, COMPARATOR);
-        state.force();
+        state.shiftSourceAndForce(1);
     }));
 }
 

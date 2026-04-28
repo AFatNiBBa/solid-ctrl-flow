@@ -196,6 +196,8 @@ return <>
   </e.Joint>
 </>
 ```
+> Same applies to `Extractor.getSourceCount()`
+
 You can use `Extractor.SameContextSource` to automate the process of using a `SameContext` inside a `Extractor.Source`. When in doubt, use `Extractor.SameContextSource` instead of `Extractor.Source`
 ```tsx
 const e = new Extractor(), ctx = createContext(1);
