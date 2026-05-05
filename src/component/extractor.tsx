@@ -1,8 +1,8 @@
 
 import { batch, ComponentProps, Context, createContext, createMemo, createRenderEffect, createSignal, For, getOwner, on, onCleanup, Owner, ParentProps, Signal, SignalOptions, splitProps, useContext } from "solid-js";
 import { OrderedLinkedList, OrderedLinkedListNode } from "../helper/orderedLinkedList";
+import { disposeWithOwner, SameContext } from "..";
 import { Portal } from "solid-js/web";
-import { SameContext } from "..";
 
 /** A function that compares the order in which a {@link Source} should be rendered inside a {@link Dest} */
 const COMPARATOR = (a: Info, b: Info) => (a.order ?? 0) - (b.order ?? 0);
@@ -109,13 +109,18 @@ function Dest(this: Extractor, props: ParentProps) {
     </>
 }
 
-/** Unbound source component */
+/**
+ * Unbound source component.
+ * It uses {@link disposeWithOwner} on the children, to make sure that the disposal doesn't wait for the destination to update.
+ * The reason why cleanups happen too late without {@link disposeWithOwner}, is not a matter of timing, updates happen INHERENTLY after disposal
+ */
 function Source(this: Extractor, props: Info) {
     const state = useContext(this.ctx);
     if (!state) return <></>;
     const { sources } = state; // Reads it only once, we don't need reactivity here anyway
     const order = createMemo(() => props.order);
-    const info: Info = { get order() { return order(); }, get children() { return props.children; } };
+    const owner = getOwner()!;
+    const info: Info = { get order() { return order(); }, get children() { return disposeWithOwner(owner, () => props.children); } };
     const node = new OrderedLinkedListNode(info);
     createRenderEffect(on(order, () => {
         onCleanup(() => {

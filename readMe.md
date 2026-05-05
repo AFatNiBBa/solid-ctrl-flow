@@ -235,5 +235,8 @@ Like `splitProps()` but passes the every part except the last one to [`memoProps
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument
 
+### `disposeWithOwner()`
+Calls a function in a way that makes it so that the reactive resources it creates are managed by 2 `Owner`s
+
 ### `runWithContext()`
 Creates a context scope that persists for the duration of a function

@@ -1,5 +1,5 @@
 
-import { Context, createRoot, getOwner, untrack } from "solid-js";
+import { Accessor, Context, createRoot, getOwner, onCleanup, Owner, runWithOwner, untrack } from "solid-js";
 
 /**
  * Executes {@link f} untracking it.
@@ -11,6 +11,21 @@ import { Context, createRoot, getOwner, untrack } from "solid-js";
  */
 export function untrackCall<F extends (...args: any[]) => unknown>(this: ThisParameterType<F>, f: F, ...args: Parameters<F>) {
     return untrack(() => f.apply(this, args) as ReturnType<F>);
+}
+
+/**
+ * Runs {@link f} and ensures that its reactive resources are cleaned up not only when the current {@link Owner} is disposed, but also when the provided one is
+ * @param outer The {@link Owner} for which to listen for its disposal
+ * @param f The function to run
+ * @return The same thing {@link f} returned
+ */
+export function disposeWithOwner<T>(outer: Owner, f: Accessor<T>) {
+    const inner = getOwner()!;
+    return createRoot(d => {
+        runWithOwner(outer, () => onCleanup(d));
+        runWithOwner(inner, () => onCleanup(d));
+        return f();
+    });
 }
 
 /**
