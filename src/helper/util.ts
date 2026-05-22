@@ -41,7 +41,8 @@ export function runWithContext<T, V extends T, R>(ctx: Context<T>, value: V | un
 	return createRoot(d => {
         try
         {
-            (getOwner()!.context ??= {})[ctx.id] = value;
+            const owner = getOwner()!;
+            owner.context = { ...owner.context, [ctx.id]: value };
             return f(value === undefined ? ctx.defaultValue as V : value);
         }
         finally { d(); }
