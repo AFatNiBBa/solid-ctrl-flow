@@ -7,6 +7,7 @@ export * from "./component/extractor";
 export * from "./component/switch";
 export * from "./helper/memo";
 export * from "./helper/orderedLinkedList";
+export * from "./helper/transition";
 export * from "./helper/unwrap";
 export * from "./helper/util";
 
