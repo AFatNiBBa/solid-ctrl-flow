@@ -16,6 +16,35 @@ return <>
 </>
 ```
 
+### `Spread`
+Fake component that executes `spread()` on the provided element
+```tsx
+return <>
+  <div
+    onClick={FIRST}
+    onclick={SECOND}
+    on:click={THIRD}
+    ref={x => <>
+      <Spread target={x} on:click={FOURTH} />
+      <Spread target={x} on:click={FIFTH} />
+      <Spread target={x} on:click={SIXTH} />
+      <Spread target={x} on:click={SEVENTH} />
+    </>}
+  />
+</>
+```
+
+### `Part`
+A wrapped `HTMLDivElement`, optimized to merge different sets of parametersare combined instead of overwritten
+```tsx
+return <>
+  <Part
+    class={FIRST}
+    props={{ class: SECOND }}
+  />
+</>
+```
+
 ### `Enfold`
 Eventually wraps its content into a template if a certain condition is met.
 The following code
@@ -232,6 +261,9 @@ Memoizes the properties of an object
 ### `splitAndMemoProps()`
 Like `splitProps()` but passes the every part except the last one to [`memoProps()`](#memoprops)
 
+### `splitAndMemoSomeProps()`
+Like `splitAndMemoProps()` but allows you to specify how many parts should be memoized
+
 ### `untrackCall()`
 Calls a function untracking what happens inside of it but not what gets passed as its argument
 
@@ -240,3 +272,9 @@ Calls a function in a way that makes it so that the reactive resources it create
 
 ### `runWithContext()`
 Creates a context scope that persists for the duration of a function
+
+### `OrderedLinkedList`
+The data structure that powers the [`Extractor`](#extractor)
+
+### `TransitionMonitor`
+Object that reactively tells whether a CSS transition is currently in progress

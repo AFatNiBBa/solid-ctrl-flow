@@ -1,6 +1,6 @@
 
 import { batch, ComponentProps, Context, createContext, createMemo, createRenderEffect, createSignal, For, getOwner, on, onCleanup, Owner, ParentProps, Signal, SignalOptions, splitProps, useContext } from "solid-js";
-import { OrderedLinkedList, OrderedLinkedListNode } from "../helper/orderedLinkedList";
+import { OrderedLinkedList } from "../helper/orderedLinkedList";
 import { disposeWithOwner, SameContext } from "..";
 import { Portal } from "solid-js/web";
 
@@ -121,7 +121,7 @@ function Source(this: Extractor, props: Info) {
     const order = createMemo(() => props.order);
     const owner = getOwner()!;
     const info: Info = { get order() { return order(); }, get children() { return disposeWithOwner(owner, () => props.children); } };
-    const node = new OrderedLinkedListNode(info);
+    const node = new OrderedLinkedList.Node(info);
     createRenderEffect(on(order, () => {
         onCleanup(() => {
             node.remove();

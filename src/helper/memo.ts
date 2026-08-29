@@ -1,5 +1,5 @@
 
-import { Accessor, createMemo, getOwner, MemoOptions, Owner, runWithOwner, splitProps } from "solid-js";
+import { Accessor, createMemo, getOwner, MemoOptions, Owner, runWithOwner, SplitProps, splitProps } from "solid-js";
 
 /** Handy type alias */
 type Equals = MemoOptions<unknown>["equals"];
@@ -17,12 +17,20 @@ export const memoProps = <T extends object>(obj: T, equals?: Equals) => new Prox
  * @param obj Object to split and partially memoize
  * @param keys The lists of the keys to split from {@link obj}
  */
-export const splitAndMemoProps: typeof splitProps = (obj, ...keys) => {
-    const out = splitProps(obj, ...keys);
-    for (var i = 0; i < keys.length; i++)
-        out[i] = memoProps(out[i]);
-    return out;
-};
+export const splitAndMemoProps: typeof splitProps = (obj, ...keys) => splitAndMemoSomeProps(obj, keys.length, ...keys);
+
+/**
+ * Executes {@link splitProps} and memoizes the first {@link n} returned objects using {@link memoProps}
+ * @param obj Object to split and partially memoize
+ * @param n The number of returned objects to memoize
+ * @param keys The lists of the keys to split from {@link obj}
+ */
+export function splitAndMemoSomeProps<T extends Record<any, any>, K extends [readonly (keyof T)[], ...(readonly (keyof T)[])[]]>(obj: T, n: number, ...keys: K): SplitProps<T, K> {
+	const out = splitProps(obj, ...keys);
+	for (var i = 0; i < n; i++)
+		out[i] = memoProps(out[i]);
+	return out;
+}
 
 /** Handler of the {@link Proxy} created by {@link memoProps} */
 class MemoPropsHandler<T extends object> implements ProxyHandler<T> {

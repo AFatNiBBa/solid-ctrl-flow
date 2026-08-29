@@ -6,7 +6,7 @@
  * - O(1) Removal (With a node reference)
  */
 export class OrderedLinkedList<T> {
-	next?: OrderedLinkedListNode<T>;
+	next?: OrderedLinkedList.Node<T>;
 
     /** Yields all the elements PAST the current */
 	*[Symbol.iterator](): Generator<T> {
@@ -23,7 +23,7 @@ export class OrderedLinkedList<T> {
      * @param comp The comparison function to use
      * @returns The same value as {@link node}
      */
-	add(node: OrderedLinkedListNode<T>, comp: (a: T, b: T) => number): OrderedLinkedListNode<T> {
+	add(node: OrderedLinkedList.Node<T>, comp: (a: T, b: T) => number): OrderedLinkedList.Node<T> {
 		const { next } = this;
 		if (next && comp(node.value, next.value) >= 0) return next.add(node, comp);
 		this.next = node;
@@ -33,17 +33,21 @@ export class OrderedLinkedList<T> {
 	}
 }
 
-/** Node for the {@link OrderedLinkedList} */
-export class OrderedLinkedListNode<T> extends OrderedLinkedList<T> {
-	constructor(public value: T) { super(); }
-    
-	prev?: OrderedLinkedList<T>;
+/** Utilities for {@link OrderedLinkedList} */
+export namespace OrderedLinkedList {
 
-    /** Removes the current node from the list */
-	remove() {
-		const { prev, next } = this;
-		if (prev) prev.next = next;
-		if (next) next.prev = prev;
-		this.next = this.prev = undefined;
+	/** Node for the {@link OrderedLinkedList} */
+	export class Node<T> extends OrderedLinkedList<T> {
+		constructor(public value: T) { super(); }
+
+		prev?: OrderedLinkedList<T>;
+
+		/** Removes the current node from the list */
+		remove() {
+			const { prev, next } = this;
+			if (prev) prev.next = next;
+			if (next) next.prev = prev;
+			this.next = this.prev = undefined;
+		}
 	}
 }
