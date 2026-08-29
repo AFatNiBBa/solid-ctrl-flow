@@ -4,6 +4,7 @@ import { spread } from "solid-js/web";
 
 export * from "./component/enfold";
 export * from "./component/extractor";
+export * from "./component/part";
 export * from "./component/switch";
 export * from "./helper/memo";
 export * from "./helper/orderedLinkedList";
