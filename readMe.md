@@ -34,17 +34,6 @@ return <>
 </>
 ```
 
-### `Part`
-A wrapped `HTMLDivElement`, optimized to merge different sets of parametersare combined instead of overwritten
-```tsx
-return <>
-  <Part
-    class={FIRST}
-    props={{ class: SECOND }}
-  />
-</>
-```
-
 ### `Enfold`
 Eventually wraps its content into a template if a certain condition is met.
 The following code

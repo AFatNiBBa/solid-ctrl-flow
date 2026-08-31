@@ -6,6 +6,7 @@
 *.ppath
 *.css
 *.scss
+bun.lock
 tsconfig.json
 
 # Inclusi
